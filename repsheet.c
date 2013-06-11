@@ -16,14 +16,32 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <getopt.h>
 #include "hiredis/hiredis.h"
+
+char *find_address(char *key)
+{
+  char *ptr = strchr(key, ':');
+
+  if (ptr == NULL) {
+    return NULL;
+  }
+
+  int position = ptr - key;
+  char* address = (char*) malloc((position + 1) * sizeof(char));
+
+  memcpy(address, key, position);
+  address[position] = '\0';
+
+  return address;
+}
 
 int main(int argc, char *argv[])
 {
   int i, c;
   redisContext *context;
-  redisReply *repsheet_members, *reply;
+  redisReply *offenders, *blacklist, *score;
   char *host = "localhost";
   int port = 6379;
 
@@ -54,20 +72,30 @@ int main(int argc, char *argv[])
     return -1;
   }
 
-  repsheet_members = redisCommand(context, "SMEMBERS repsheet");
+  char *address = malloc(16);
+  offenders = redisCommand(context, "KEYS *:*:count");
 
-  for (i = 0; i < repsheet_members->elements; i++) {
-    reply = redisCommand(context, "EXISTS %s", repsheet_members->element[i]->str);
-    if (reply->integer == 0) {
-      printf("Removing %s\n", repsheet_members->element[i]->str);
-      freeReplyObject(redisCommand(context, "SREM repsheet %s", repsheet_members->element[i]->str));
+  for (i = 0; i < offenders->elements; i++) {
+    address = find_address(offenders->element[i]->str);
+
+    blacklist = redisCommand(context, "GET %s:repsheet:blacklist", address);
+    if (blacklist && (blacklist->type != REDIS_REPLY_NIL) && (strcmp(blacklist->str, "true") == 0)) {
+      freeReplyObject(blacklist);
+      continue;
     }
-    freeReplyObject(reply);
+
+    score = redisCommand(context, "GET %s", offenders->element[i]->str);
+    if (score->type != REDIS_REPLY_NIL) {
+      if (atoi(score->str) > 20) {
+        redisCommand(context, "SET %s:repsheet:blacklist true", address);
+        printf("%s (%s offenses)\n", address, score->str);
+      }
+    }
+    freeReplyObject(score);
   }
 
-  freeReplyObject(repsheet_members);
+  freeReplyObject(offenders);
   redisFree(context);
 
   return 0;
 }
-
