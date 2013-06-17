@@ -1,12 +1,15 @@
 CFLAGS += -Wall -Werror
+BIN = repsheet
 
 .PHONY: clean
+
+all: $(BIN)
 
 repsheet.o:
 	gcc $(CFLAGS) -c repsheet.c
 
-backend: repsheet.o
-	gcc repsheet.o -o repsheet -lhiredis
+repsheet: repsheet.o
+	gcc repsheet.o -o $(BIN) -lhiredis
 
 clean:
-	rm -rf *.la *.lo *.slo *.o .libs *.dSYM repsheet
+	rm -rf *.o *.dSYM repsheet
