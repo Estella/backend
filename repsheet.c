@@ -23,7 +23,6 @@
 char *strip_address(char *key)
 {
   char *ptr = strchr(key, ':');
-
   if (ptr == NULL) {
     return NULL;
   }
@@ -41,7 +40,7 @@ int main(int argc, char *argv[])
 {
   int i, c;
   redisContext *context;
-  redisReply *offenders, *blacklist, *score;
+  redisReply *offenders, *blacklist, *score, *suspects;
   char *host = "localhost";
   int port = 6379;
   int threshold = 200;
@@ -78,10 +77,10 @@ int main(int argc, char *argv[])
 
   int printed = 0;
   char *address = malloc(16);
-  offenders = redisCommand(context, "KEYS *:*:count");
+  suspects = redisCommand(context, "KEYS *:*:count");
 
-  for (i = 0; i < offenders->elements; i++) {
-    address = strip_address(offenders->element[i]->str);
+  for (i = 0; i < suspects->elements; i++) {
+    address = strip_address(suspects->element[i]->str);
 
     blacklist = redisCommand(context, "GET %s:repsheet:blacklist", address);
     if (blacklist && (blacklist->type != REDIS_REPLY_NIL) && (strcmp(blacklist->str, "true") == 0)) {
@@ -89,31 +88,29 @@ int main(int argc, char *argv[])
       continue;
     }
 
-    score = redisCommand(context, "GET %s", offenders->element[i]->str);
+    score = redisCommand(context, "GET %s", suspects->element[i]->str);
     if (score->type != REDIS_REPLY_NIL) {
-      freeReplyObject(redisCommand(context, "HINCRBY backend:sweeper %s %s", address, score->str));
+      freeReplyObject(redisCommand(context, "ZINCRBY offenders %s %s", score->str, address));
     }
     freeReplyObject(score);
     freeReplyObject(blacklist);
   }
+  freeReplyObject(suspects);
 
-  offenders = redisCommand(context, "HGETALL backend:sweeper");
+  offenders = redisCommand(context, "ZRANGEBYSCORE offenders %d +inf", threshold);
   if ((offenders->type = REDIS_REPLY_ARRAY) && (offenders->elements > 0)) {
-    for(i = 0; i < offenders->elements; i+=2) {
-      if (atoi(offenders->element[i + 1]->str) > threshold) {
-        if (!printed) {
-          printf("Blacklisting the following repeat offenders (threshold == %d)\n", threshold);
-          printed = 1;
-        }
-
-        redisCommand(context, "SET %s:repsheet:blacklist true", offenders->element[i]->str);
-        printf("  %s (%s offenses)\n", offenders->element[i]->str, offenders->element[i + 1]->str);
+    for(i = 0; i < offenders->elements; i++) {
+      if (!printed) {
+        printf("Blacklisting the following repeat offenders (threshold == %d)\n", threshold);
+        printed = 1;
       }
+      freeReplyObject(redisCommand(context, "SET %s:repsheet:blacklist true", offenders->element[i]->str));
+      printf("  %s\n", offenders->element[i]->str);
     }
   }
-
   freeReplyObject(offenders);
-  freeReplyObject(redisCommand(context, "DEL backend:sweeper"));
+
+  freeReplyObject(redisCommand(context, "DEL offenders"));
   redisFree(context);
 
   return 0;
