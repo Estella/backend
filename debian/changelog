@@ -1,3 +1,9 @@
+repsheet-backend (0.2-1) unstable-security; urgency=low
+
+  * Expire auto blacklisted keys after 24 hours
+
+ -- Aaron Bedra <aaron.bedra@braintreepayments.com>  Tue, 18 Jun 2013 21:13:44 +0000
+
 repsheet-backend (0.1-1) unstable-security; urgency=low
 
   * Initial release.
