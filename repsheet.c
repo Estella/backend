@@ -20,7 +20,35 @@
 #include <getopt.h>
 #include "hiredis/hiredis.h"
 
-char *strip_address(char *key)
+typedef struct config_t {
+  char *host;
+  int port;
+  int threshold;
+  int report;
+  int blacklist;
+} config_t;
+
+config_t config;
+
+static redisContext *get_redis_context()
+{
+  redisContext *context;
+
+  context = redisConnect(config.host, config.port);
+  if (context == NULL || context->err) {
+    if (context) {
+      printf("Redis Connection Error: %s\n", context->errstr);
+      redisFree(context);
+    } else {
+      perror("Connection Error: can't allocate redis context\n");
+    }
+    return NULL;
+  } else {
+    return context;
+  }
+}
+
+static char *strip_address(char *key)
 {
   char *ptr = strchr(key, ':');
   if (ptr == NULL) {
@@ -36,49 +64,15 @@ char *strip_address(char *key)
   return address;
 }
 
-int main(int argc, char *argv[])
+static void score(redisContext *context)
 {
-  int i, c;
-  redisContext *context;
-  redisReply *offenders, *blacklist, *score, *suspects;
-  char *host = "localhost";
-  int port = 6379;
-  int threshold = 200;
-
-  while((c = getopt (argc, argv, "h:p:t:")) != -1)
-    switch(c)
-      {
-      case 'h':
-        host = optarg;
-        break;
-      case 'p':
-        port = atoi(optarg);
-        break;
-      case 't':
-        threshold = atoi(optarg);
-        break;
-      case '?':
-        return 1;
-      default:
-        abort();
-      }
-
-  context = redisConnect(host, port);
-  if (context == NULL || context->err) {
-    if (context) {
-      printf("Redis Connection Error: %s\n", context->errstr);
-      redisFree(context);
-    } else {
-      perror("Connection Error: can't allocate redis context\n");
-      redisFree(context);
-    }
-    return -1;
-  }
-
-  int printed = 0;
+  int i;
+  redisReply *blacklist, *score, *suspects;
   char *address = malloc(16);
-  suspects = redisCommand(context, "KEYS *:*:count");
 
+  freeReplyObject(redisCommand(context, "DEL offenders"));
+
+  suspects = redisCommand(context, "KEYS *:*:count");
   for (i = 0; i < suspects->elements; i++) {
     address = strip_address(suspects->element[i]->str);
 
@@ -96,6 +90,14 @@ int main(int argc, char *argv[])
     freeReplyObject(blacklist);
   }
   freeReplyObject(suspects);
+  free(address);
+}
+
+static void blacklist_offenders(redisContext *context, int threshold)
+{
+  int i;
+  int printed = 0;
+  redisReply *offenders;
 
   offenders = redisCommand(context, "ZRANGEBYSCORE offenders %d +inf", threshold);
   if ((offenders->type = REDIS_REPLY_ARRAY) && (offenders->elements > 0)) {
@@ -109,8 +111,87 @@ int main(int argc, char *argv[])
     }
   }
   freeReplyObject(offenders);
+}
 
+static void report(redisContext *context)
+{
+  int i;
+  redisReply *top_ten, *score;
+
+  top_ten = redisCommand(context, "ZREVRANGEBYSCORE offenders +inf 0");
+  if ((top_ten->type == REDIS_REPLY_ARRAY) && (top_ten->elements > 0)) {
+    printf("Top 10 Suspsects (not yet blacklisted)\n");
+    for(i = 0; i <= 10; i++) {
+      score = redisCommand(context, "ZSCORE offenders %s", top_ten->element[i]->str);
+      printf("  %s\t%s offenses\n", top_ten->element[i]->str, score->str);
+    }
+  }
+  freeReplyObject(top_ten);
+  freeReplyObject(score);
+}
+
+static void cleanup(redisContext *context)
+{
   freeReplyObject(redisCommand(context, "DEL offenders"));
+}
+
+int main(int argc, char *argv[])
+{
+  int c;
+  redisContext *context;
+
+  config.host = "localhost";
+  config.port = 6379;
+  config.threshold = 200;
+  config.report = 0;
+  config.blacklist = 0;
+
+  while((c = getopt (argc, argv, "h:p:t:rb")) != -1)
+    switch(c)
+      {
+      case 'h':
+        config.host = optarg;
+        break;
+      case 'p':
+        config.port = atoi(optarg);
+        break;
+      case 't':
+        config.threshold = atoi(optarg);
+        break;
+      case 'r':
+        config.report = 1;
+        break;
+      case 'b':
+        config.blacklist = 1;
+        break;
+      case '?':
+        return 1;
+      default:
+        abort();
+      }
+
+  if (!config.report && !config.blacklist) {
+    printf("You must choose at least one option [-r | -b] (report or blacklist)\n");
+    return -1;
+  }
+
+  context = get_redis_context(config.host, config.port);
+  if (context == NULL) {
+    return -1;
+  }
+
+  if (config.blacklist) {
+    score(context);
+    blacklist_offenders(context, config.threshold);
+    cleanup(context);
+  }
+
+  if (config.report) {
+    score(context);
+    report(context);
+    cleanup(context);
+  }
+
   redisFree(context);
 
   return 0;
