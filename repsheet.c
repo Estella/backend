@@ -118,10 +118,10 @@ static void report(redisContext *context)
     for(i = 0; i <= 10; i++) {
       score = redisCommand(context, "ZSCORE offenders %s", top_ten->element[i]->str);
       printf("  %s\t%s offenses\n", top_ten->element[i]->str, score->str);
+      freeReplyObject(score);
     }
   }
   freeReplyObject(top_ten);
-  freeReplyObject(score);
 }
 
 static void print_usage()
