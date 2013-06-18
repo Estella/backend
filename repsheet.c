@@ -26,6 +26,7 @@ typedef struct config_t {
   int threshold;
   int report;
   int blacklist;
+  int score;
 } config_t;
 
 config_t config;
@@ -93,17 +94,17 @@ static void score(redisContext *context)
   free(address);
 }
 
-static void blacklist_offenders(redisContext *context, int threshold)
+static void blacklist_offenders(redisContext *context)
 {
   int i;
   int printed = 0;
   redisReply *offenders;
 
-  offenders = redisCommand(context, "ZRANGEBYSCORE offenders %d +inf", threshold);
+  offenders = redisCommand(context, "ZRANGEBYSCORE offenders %d +inf", config.threshold);
   if ((offenders->type = REDIS_REPLY_ARRAY) && (offenders->elements > 0)) {
     for(i = 0; i < offenders->elements; i++) {
       if (!printed) {
-        printf("Blacklisting the following repeat offenders (threshold == %d)\n", threshold);
+        printf("Blacklisting the following repeat offenders (threshold == %d)\n", config.threshold);
         printed = 1;
       }
       freeReplyObject(redisCommand(context, "SET %s:repsheet:blacklist true", offenders->element[i]->str));
@@ -130,11 +131,6 @@ static void report(redisContext *context)
   freeReplyObject(score);
 }
 
-static void cleanup(redisContext *context)
-{
-  freeReplyObject(redisCommand(context, "DEL offenders"));
-}
-
 int main(int argc, char *argv[])
 {
   int c;
@@ -143,10 +139,11 @@ int main(int argc, char *argv[])
   config.host = "localhost";
   config.port = 6379;
   config.threshold = 200;
+  config.score = 0;
   config.report = 0;
   config.blacklist = 0;
 
-  while((c = getopt (argc, argv, "h:p:t:rb")) != -1)
+  while((c = getopt (argc, argv, "h:p:t:srb")) != -1)
     switch(c)
       {
       case 'h':
@@ -157,6 +154,9 @@ int main(int argc, char *argv[])
         break;
       case 't':
         config.threshold = atoi(optarg);
+        break;
+      case 's':
+        config.score = 1;
         break;
       case 'r':
         config.report = 1;
@@ -170,26 +170,29 @@ int main(int argc, char *argv[])
         abort();
       }
 
-  if (!config.report && !config.blacklist) {
-    printf("You must choose at least one option [-r | -b] (report or blacklist)\n");
-    return -1;
-  }
-
   context = get_redis_context(config.host, config.port);
   if (context == NULL) {
     return -1;
   }
 
+  if (!config.report && !config.blacklist && !config.score) {
+    printf("No options specified, performing score operation.\nTo remove this message, specify -s (score) or [-r | -b] (report or blacklist)\n");
+    score(context);
+  }
+
+  if (config.score) {
+    score(context);
+  }
+
   if (config.blacklist) {
     score(context);
-    blacklist_offenders(context, config.threshold);
-    cleanup(context);
+    blacklist_offenders(context);
+    score(context);
   }
 
   if (config.report) {
     score(context);
     report(context);
-    cleanup(context);
   }
 
   redisFree(context);
