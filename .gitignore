@@ -1,3 +1,7 @@
 repsheet
 *.dSYM
 *.o
+debian/files
+debian/repsheet-backend.debhelper.log
+debian/repsheet-backend.substvars
+debian/repsheet-backend
