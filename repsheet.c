@@ -20,14 +20,7 @@
 #include <getopt.h>
 #include "hiredis/hiredis.h"
 
-typedef struct config_t {
-  char *host;
-  int port;
-  int threshold;
-  int report;
-  int blacklist;
-  int score;
-} config_t;
+#include "repsheet.h"
 
 config_t config;
 
@@ -131,6 +124,12 @@ static void report(redisContext *context)
   freeReplyObject(score);
 }
 
+static void print_usage()
+{
+  printf("Repsheet Backend Version %s\n", VERSION);
+  printf("usage: repsheet [-h] [-p] [-sbr]\n  -h <redis host>\n  -p <redis port>\n  -s (score actors)\n  -r (report top 10 offenders)\n  -b (blacklist offenders)\n");
+}
+
 int main(int argc, char *argv[])
 {
   int c;
@@ -143,7 +142,7 @@ int main(int argc, char *argv[])
   config.report = 0;
   config.blacklist = 0;
 
-  while((c = getopt (argc, argv, "h:p:t:srb")) != -1)
+  while((c = getopt (argc, argv, "h:p:t:srbv")) != -1)
     switch(c)
       {
       case 'h':
@@ -164,9 +163,14 @@ int main(int argc, char *argv[])
       case 'b':
         config.blacklist = 1;
         break;
+      case 'v':
+        print_usage();
+	return 0;
+        break;
       case '?':
         return 1;
       default:
+        print_usage();
         abort();
       }
 
