@@ -101,6 +101,7 @@ static void blacklist_offenders(redisContext *context)
         printed = 1;
       }
       freeReplyObject(redisCommand(context, "SET %s:repsheet:blacklist true", offenders->element[i]->str));
+      freeReplyObject(redisCommand(context, "EXPIRE %s:repsheet:blacklist %d", offenders->element[i]->str, config.expiry));
       printf("  %s\n", offenders->element[i]->str);
     }
   }
@@ -141,6 +142,7 @@ int main(int argc, char *argv[])
   config.score = 0;
   config.report = 0;
   config.blacklist = 0;
+  config.expiry = (24 * 60 * 60);
 
   while((c = getopt (argc, argv, "h:p:t:srbv")) != -1)
     switch(c)

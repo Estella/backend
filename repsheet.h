@@ -10,6 +10,7 @@ typedef struct config_t {
   int report;
   int blacklist;
   int score;
+  int expiry;
 } config_t;
 
 #endif
