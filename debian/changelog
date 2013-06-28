@@ -1,3 +1,9 @@
+repsheet-backend (0.5-1) unstable-security; urgency=low
+
+  * Various fixes for robustness. Don't blacklist whitelisted actors.
+
+ -- Aaron Bedra <aaron.bedra@braintreepayments.com>  Fri, 28 Jun 2013 16:03:58 +0000
+
 repsheet-backend (0.2-1) unstable-security; urgency=low
 
   * Expire auto blacklisted keys after 24 hours
