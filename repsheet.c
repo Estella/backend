@@ -67,23 +67,26 @@ static void score(redisContext *context)
   freeReplyObject(redisCommand(context, "DEL offenders"));
 
   suspects = redisCommand(context, "KEYS *:*:count");
-  for (i = 0; i < suspects->elements; i++) {
-    address = strip_address(suspects->element[i]->str);
+  if (suspects && suspects->type == REDIS_REPLY_ARRAY) {
+    for (i = 0; i < suspects->elements; i++) {
+      address = strip_address(suspects->element[i]->str);
 
-    blacklist = redisCommand(context, "GET %s:repsheet:blacklist", address);
-    if (blacklist && (blacklist->type != REDIS_REPLY_NIL) && (strcmp(blacklist->str, "true") == 0)) {
+      blacklist = redisCommand(context, "GET %s:repsheet:blacklist", address);
+      if (blacklist && (blacklist->type == REDIS_REPLY_STRING) && (strcmp(blacklist->str, "true") == 0)) {
+        freeReplyObject(blacklist);
+        continue;
+      }
       freeReplyObject(blacklist);
-      continue;
-    }
 
-    score = redisCommand(context, "GET %s", suspects->element[i]->str);
-    if (score->type != REDIS_REPLY_NIL) {
-      freeReplyObject(redisCommand(context, "ZINCRBY offenders %s %s", score->str, address));
+      score = redisCommand(context, "GET %s", suspects->element[i]->str);
+      if (score && score->type == REDIS_REPLY_STRING) {
+        freeReplyObject(redisCommand(context, "ZINCRBY offenders %s %s", score->str, address));
+      }
+      freeReplyObject(score);
     }
-    freeReplyObject(score);
-    freeReplyObject(blacklist);
+    freeReplyObject(suspects);
   }
-  freeReplyObject(suspects);
+
   free(address);
 }
 
@@ -94,11 +97,11 @@ static void blacklist_offenders(redisContext *context)
   redisReply *offenders, *whitelist;
 
   offenders = redisCommand(context, "ZRANGEBYSCORE offenders %d +inf", config.threshold);
-  if ((offenders->type = REDIS_REPLY_ARRAY) && (offenders->elements > 0)) {
+  if (offenders && (offenders->type == REDIS_REPLY_ARRAY)) {
     for(i = 0; i < offenders->elements; i++) {
 
       whitelist = redisCommand(context, "GET %s:repsheet:whitelist", offenders->element[i]->str);
-      if (whitelist->type != REDIS_REPLY_NIL && strcmp(whitelist->str, "true") == 0) {
+      if (whitelist && whitelist->type == REDIS_REPLY_STRING && strcmp(whitelist->str, "true") == 0) {
         continue;
       }
       freeReplyObject(whitelist);
@@ -107,12 +110,13 @@ static void blacklist_offenders(redisContext *context)
         printf("Blacklisting the following repeat offenders (threshold == %d)\n", config.threshold);
         printed = 1;
       }
+
       freeReplyObject(redisCommand(context, "SET %s:repsheet:blacklist true", offenders->element[i]->str));
       freeReplyObject(redisCommand(context, "EXPIRE %s:repsheet:blacklist %d", offenders->element[i]->str, config.expiry));
       printf("  %s\n", offenders->element[i]->str);
     }
+    freeReplyObject(offenders);
   }
-  freeReplyObject(offenders);
 }
 
 static void report(redisContext *context)
@@ -121,15 +125,28 @@ static void report(redisContext *context)
   redisReply *top_ten, *score;
 
   top_ten = redisCommand(context, "ZREVRANGEBYSCORE offenders +inf 0");
-  if ((top_ten->type == REDIS_REPLY_ARRAY) && (top_ten->elements > 0)) {
-    printf("Top 10 Suspsects (not yet blacklisted)\n");
-    for(i = 0; i <= 10; i++) {
-      score = redisCommand(context, "ZSCORE offenders %s", top_ten->element[i]->str);
-      printf("  %s\t%s offenses\n", top_ten->element[i]->str, score->str);
-      freeReplyObject(score);
+  if (top_ten && (top_ten->type == REDIS_REPLY_ARRAY) && (top_ten->elements > 0)) {
+    if (top_ten->elements > 10) {
+      printf("Top 10 Suspsects (not yet blacklisted)\n");
+      for(i = 0; i < 10; i++) {
+        score = redisCommand(context, "ZSCORE offenders %s", top_ten->element[i]->str);
+        if (score && score->type == REDIS_REPLY_STRING) {
+          printf("  %s\t%s offenses\n", top_ten->element[i]->str, score->str);
+          freeReplyObject(score);
+        }
+      }
+    } else {
+      printf("Top %zu Suspsects (not yet blacklisted)\n", top_ten->elements);
+      for(i = 0; i < top_ten->elements; i++) {
+        score = redisCommand(context, "ZSCORE offenders %s", top_ten->element[i]->str);
+        if (score && score->type == REDIS_REPLY_STRING) {
+          printf("  %s\t%s offenses\n", top_ten->element[i]->str, score->str);
+          freeReplyObject(score);
+        }
+      }
     }
+    freeReplyObject(top_ten);
   }
-  freeReplyObject(top_ten);
 }
 
 static void print_usage()

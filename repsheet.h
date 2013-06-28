@@ -17,7 +17,7 @@
 #ifndef __REPSHEET_H
 #define __REPSHEET_H
 
-#define VERSION "0.4"
+#define VERSION "0.5"
 
 typedef struct config_t {
   char *host;
