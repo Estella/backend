@@ -1,3 +1,5 @@
 repsheet
 *.dSYM
 *.o
+backend.tar.gz
+cov-int

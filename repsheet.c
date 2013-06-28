@@ -91,11 +91,18 @@ static void blacklist_offenders(redisContext *context)
 {
   int i;
   int printed = 0;
-  redisReply *offenders;
+  redisReply *offenders, *whitelist;
 
   offenders = redisCommand(context, "ZRANGEBYSCORE offenders %d +inf", config.threshold);
   if ((offenders->type = REDIS_REPLY_ARRAY) && (offenders->elements > 0)) {
     for(i = 0; i < offenders->elements; i++) {
+
+      whitelist = redisCommand(context, "GET %s:repsheet:whitelist", offenders->element[i]->str);
+      if (whitelist->type != REDIS_REPLY_NIL && strcmp(whitelist->str, "true") == 0) {
+        continue;
+      }
+      freeReplyObject(whitelist);
+
       if (!printed) {
         printf("Blacklisting the following repeat offenders (threshold == %d)\n", config.threshold);
         printed = 1;
@@ -167,7 +174,7 @@ int main(int argc, char *argv[])
         break;
       case 'v':
         print_usage();
-	return 0;
+        return 0;
         break;
       case '?':
         return 1;
