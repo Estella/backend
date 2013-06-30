@@ -14,26 +14,11 @@
   limitations under the License.
 */
 
-#ifndef __REPSHEET_H
-#define __REPSHEET_H
+#ifndef __SCORE_H
+#define __SCORE_H
 
-#define VERSION "0.5"
+#include "repsheet.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <getopt.h>
-
-#include "hiredis/hiredis.h"
-
-typedef struct config_t {
-  char *host;
-  int port;
-  int threshold;
-  int report;
-  int blacklist;
-  int score;
-  int expiry;
-} config_t;
+void score(redisContext *context);
 
 #endif

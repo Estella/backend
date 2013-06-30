@@ -45,3 +45,8 @@ stamp-h1
 
 
 
+test-driver
+test/.deps/
+test/*.log
+test/test_runner
+test/test_runner.trs
