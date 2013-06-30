@@ -1,4 +1,4 @@
-#include "../src/repsheet.h"
+#include "../src/score.h"
 #include "test_suite.h"
 
 redisContext *context;
@@ -22,10 +22,12 @@ void teardown(void)
   redisFree(context);
 }
 
-START_TEST(wiring)
+START_TEST(score_creates_offenders_key_of_type_zset)
 {
-  reply = redisCommand(context, "PING");  
-  ck_assert_str_eq(reply->str, "PONG");
+  freeReplyObject(redisCommand(context, "set 1.1.1.1:950001:count 10"));
+  score(context);
+  reply = redisCommand(context, "type offenders");
+  ck_assert_str_eq(reply->str, "zset");
 }
 END_TEST
 
@@ -34,7 +36,7 @@ Suite *make_repsheet_suite(void) {
 
   TCase *tc_backend = tcase_create("repsheet_backend");
   tcase_add_checked_fixture(tc_backend, setup, teardown);
-  tcase_add_test(tc_backend, wiring);
+  tcase_add_test(tc_backend, score_creates_offenders_key_of_type_zset);
   suite_add_tcase(suite, tc_backend);
 
   return suite;
