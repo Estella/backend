@@ -101,10 +101,10 @@ static void blacklist_offenders(redisContext *context)
     for(i = 0; i < offenders->elements; i++) {
 
       whitelist = redisCommand(context, "GET %s:repsheet:whitelist", offenders->element[i]->str);
-      if (whitelist && whitelist->type == REDIS_REPLY_STRING && strcmp(whitelist->str, "true") == 0) {
+      if (whitelist && (whitelist->type == REDIS_REPLY_STRING) && strcmp(whitelist->str, "true") == 0) {
+        freeReplyObject(whitelist);
         continue;
       }
-      freeReplyObject(whitelist);
 
       if (!printed) {
         printf("Blacklisting the following repeat offenders (threshold == %d)\n", config.threshold);
@@ -200,7 +200,7 @@ int main(int argc, char *argv[])
         abort();
       }
 
-  context = get_redis_context(config.host, config.port);
+  context = get_redis_context();
   if (context == NULL) {
     return -1;
   }
