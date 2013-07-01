@@ -9,10 +9,15 @@ under cron.
 ## Compiling
 
 You need the [hiredis](https://github.com/redis/hiredis) library
-installed for compilation and linking.
+installed for compilation and linking. You also need the standard
+autotools packages. This includes `autoconf`, `automake`, and
+`libtool`.
 
 ```sh
+$ ./autogen.sh
+$ ./configure
 $ make
+$ sudo make install
 ```
 
 ## Usage
