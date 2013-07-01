@@ -28,9 +28,9 @@ void blacklist(redisContext *context, config_t config)
 
       whitelist = redisCommand(context, "GET %s:repsheet:whitelist", offenders->element[i]->str);
       if (whitelist && whitelist->type == REDIS_REPLY_STRING && strcmp(whitelist->str, "true") == 0) {
+	freeReplyObject(whitelist);
         continue;
       }
-      freeReplyObject(whitelist);
 
       if (!printed) {
         printf("Blacklisting the following repeat offenders (threshold == %d)\n", config.threshold);
