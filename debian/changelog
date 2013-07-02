@@ -1,4 +1,10 @@
-repsheet-backend (0.7-1) UNRELEASED; urgency=low
+repsheet-backend (0.8-1) unstable-security; urgency=low
+
+  * Added more tests. Fixed minor issues.
+
+ -- Aaron Bedra <aaron@aaronbedra.com>  Mon, 01 Jul 2013 23:19:41 -0500
+
+repsheet-backend (0.7-1) unstable-security; urgency=low
 
   * Moved to autotools workflow. Added test suite. Fixed segfault in blacklist
 
