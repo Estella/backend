@@ -1,3 +1,9 @@
+repsheet-backend (0.7-1) UNRELEASED; urgency=low
+
+  * Moved to autotools workflow. Added test suite. Fixed segfault in blacklist
+
+ -- Aaron Bedra <aaron@aaronbedra.com>  Mon, 01 Jul 2013 19:14:27 -0500
+
 repsheet-backend (0.5-1) unstable-security; urgency=low
 
   * Various fixes for robustness. Don't blacklist whitelisted actors.
