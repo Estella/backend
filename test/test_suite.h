@@ -3,6 +3,6 @@
 
 #include <check.h>
 
-Suite *make_repsheet_suite();
+Suite *make_score_suite();
 
 #endif

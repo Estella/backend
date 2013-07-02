@@ -1,6 +1,6 @@
 TESTS = test_runner
 check_PROGRAMS = $(TESTS)
-test_runner_SOURCES = repsheet_test.c \
+test_runner_SOURCES = score_test.c \
                       test_runner.c \
                       $(top_builddir)/src/score.c     \
                       $(top_builddir)/src/score.h     \

@@ -50,13 +50,12 @@ void score(redisContext *context)
         freeReplyObject(blacklist);
         continue;
       }
-      freeReplyObject(blacklist);
 
       score = redisCommand(context, "GET %s", suspects->element[i]->str);
       if (score && score->type == REDIS_REPLY_STRING) {
         freeReplyObject(redisCommand(context, "ZINCRBY offenders %s %s", score->str, address));
+	freeReplyObject(score);
       }
-      freeReplyObject(score);
     }
     freeReplyObject(suspects);
   }
