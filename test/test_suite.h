@@ -4,5 +4,6 @@
 #include <check.h>
 
 Suite *make_score_suite();
+Suite *make_blacklist_suite();
 
 #endif

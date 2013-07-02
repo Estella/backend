@@ -28,7 +28,7 @@ void blacklist(redisContext *context, config_t config)
 
       whitelist = redisCommand(context, "GET %s:repsheet:whitelist", offenders->element[i]->str);
       if (whitelist && whitelist->type == REDIS_REPLY_STRING && strcmp(whitelist->str, "true") == 0) {
-	freeReplyObject(whitelist);
+        freeReplyObject(whitelist);
         continue;
       }
 
