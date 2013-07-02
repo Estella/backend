@@ -1,7 +1,8 @@
 TESTS = test_runner
 check_PROGRAMS = $(TESTS)
-test_runner_SOURCES = score_test.c \
-                      test_runner.c \
+test_runner_SOURCES = test_runner.c    \
+                      score_test.c     \
+                      blacklist_test.c \
                       $(top_builddir)/src/score.c     \
                       $(top_builddir)/src/score.h     \
                       $(top_builddir)/src/report.c    \

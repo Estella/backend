@@ -58,7 +58,6 @@ void score(redisContext *context)
       }
     }
     freeReplyObject(suspects);
+    free(address);
   }
-
-  free(address);
 }

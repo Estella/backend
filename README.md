@@ -1,4 +1,4 @@
-# Repsheet Backend
+# Repsheet Backend  [![Build Status](https://secure.travis-ci.org/repsheet/backend.png)](http://travis-ci.org/repsheet/backend?branch=master)
 
 This is the backend infrastructure for
 [Repsheet](https://github.com/repsheet/repsheet). It provides
