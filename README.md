@@ -1,4 +1,4 @@
-# Repsheet Backend
+# Repsheet Backend  [![Build Status](https://secure.travis-ci.org/repsheet/backend.png)](http://travis-ci.org/repsheet/backend?branch=master)
 
 This is the backend infrastructure for
 [Repsheet](https://github.com/repsheet/repsheet). It provides
@@ -9,10 +9,15 @@ under cron.
 ## Compiling
 
 You need the [hiredis](https://github.com/redis/hiredis) library
-installed for compilation and linking.
+installed for compilation and linking. You also need the standard
+autotools packages. This includes `autoconf`, `automake`, and
+`libtool`.
 
 ```sh
+$ ./autogen.sh
+$ ./configure
 $ make
+$ sudo make install
 ```
 
 ## Usage
