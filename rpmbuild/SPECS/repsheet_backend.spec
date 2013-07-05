@@ -1,6 +1,6 @@
 Summary: The backend for Repsheet
 Name: repsheet_backend
-Version: 0.3
+Version: 0.8
 Release: 1
 License: ASL 2.0
 Group: System Environment/Daemons
@@ -18,11 +18,13 @@ blacklisting offenders on the Repsheet
 %setup -q
 
 %build
+./autogen.sh
+%configure
 make
 
 %install
 rm -rf $RPM_BUILD_ROOT
-install -D -m755 repsheet $RPM_BUILD_ROOT/%{_bindir}/repsheet
+install -D -m755 src/repsheet $RPM_BUILD_ROOT/%{_bindir}/repsheet
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -33,5 +35,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/repsheet
 
 %changelog
+* Fri Jul 05 2013 Aaron Bedra <aaron@aaronbedra.com> - 0.8-1
+- Memory allocation fixes
 * Thu Jun 27 2013 Aaron Bedra <aaron@aaronbedra.com> - 0.3-1
 - Initial build.
