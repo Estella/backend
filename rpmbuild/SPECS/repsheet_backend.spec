@@ -1,6 +1,6 @@
 Summary: The backend for Repsheet
 Name: repsheet_backend
-Version: 0.8
+Version: 0.9
 Release: 1
 License: ASL 2.0
 Group: System Environment/Daemons
@@ -35,6 +35,8 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/repsheet
 
 %changelog
+* Sat Jul 06 2013 Aaron Bedra <aaron@aaronbedra.com> - 0.9-1
+- Do not score whitelisted actors
 * Fri Jul 05 2013 Aaron Bedra <aaron@aaronbedra.com> - 0.8-1
 - Memory allocation fixes
 * Thu Jun 27 2013 Aaron Bedra <aaron@aaronbedra.com> - 0.3-1
