@@ -16,7 +16,7 @@ void setup(void)
 void teardown(void)
 {
   freeReplyObject(redisCommand(context, "flushdb"));
-  if (!reply == NULL) {
+  if (reply) {
     freeReplyObject(reply);
   }
   redisFree(context);
@@ -51,6 +51,18 @@ START_TEST(does_not_score_blacklisted_actors)
 }
 END_TEST
 
+START_TEST(does_not_score_whitelisted_actors)
+{
+  freeReplyObject(redisCommand(context, "SET 1.1.1.1:950001:count 10"));
+  freeReplyObject(redisCommand(context, "SET 1.1.1.2:950001:count 10"));
+  freeReplyObject(redisCommand(context, "SET 1.1.1.2:repsheet:whitelist true"));
+  score(context);
+  reply = redisCommand(context, "ZRANGE offenders 0 -1");
+  ck_assert_int_eq(reply->elements, 1);
+  ck_assert_str_eq(reply->element[0]->str, "1.1.1.1");
+}
+END_TEST
+
 START_TEST(accounts_for_all_offenses_of_an_actor)
 {
   freeReplyObject(redisCommand(context, "SET 1.1.1.1:950001:count 10"));
@@ -69,6 +81,7 @@ Suite *make_score_suite(void) {
   tcase_add_test(tc_score, does_nothing_if_there_are_no_suspects);
   tcase_add_test(tc_score, creates_offenders_key_of_type_zset);
   tcase_add_test(tc_score, does_not_score_blacklisted_actors);
+  tcase_add_test(tc_score, does_not_score_whitelisted_actors);
   tcase_add_test(tc_score, accounts_for_all_offenses_of_an_actor);
   suite_add_tcase(suite, tc_score);
 
