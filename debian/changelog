@@ -1,3 +1,9 @@
+repsheet-backend (0.9-1) unstable-security; urgency=low
+
+  * Don't score whitelisted actors
+
+ -- Aaron Bedra <aaron@aaronbedra.com>  Sat, 06 Jul 2013 10:42:08 -0500
+
 repsheet-backend (0.8-1) unstable-security; urgency=low
 
   * Added more tests. Fixed minor issues.
