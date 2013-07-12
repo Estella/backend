@@ -1,3 +1,9 @@
+repsheet-backend (0.10-1) unstable-security; urgency=low
+
+  * Fixes for segfaults under heavy Redis load
+
+ -- Aaron Bedra <aaron@aaronbedra.com>  Fri, 12 Jul 2013 13:44:18 -0500
+
 repsheet-backend (0.9-1) unstable-security; urgency=low
 
   * Don't score whitelisted actors
