@@ -1,4 +1,5 @@
 #include "../src/blacklist.h"
+#include "../src/score.h"
 #include "test_suite.h"
 
 redisContext *context;
