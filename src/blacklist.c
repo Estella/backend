@@ -37,8 +37,8 @@ void blacklist(redisContext *context, config_t config)
         printed = 1;
       }
 
-      freeReplyObject(redisCommand(context, "SET %s:repsheet:blacklist true", offenders->element[i]->str));
-      freeReplyObject(redisCommand(context, "EXPIRE %s:repsheet:blacklist %d", offenders->element[i]->str, config.expiry));
+      redisCommand(context, "SET %s:repsheet:blacklist true", offenders->element[i]->str);
+      redisCommand(context, "EXPIRE %s:repsheet:blacklist %d", offenders->element[i]->str, config.expiry);
       printf("  %s\n", offenders->element[i]->str);
     }
     freeReplyObject(offenders);

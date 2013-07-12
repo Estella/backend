@@ -38,7 +38,7 @@ void score(redisContext *context)
   redisReply *blacklist, *whitelist, *score, *suspects;
   char *address = malloc(16);
 
-  freeReplyObject(redisCommand(context, "DEL offenders"));
+  redisCommand(context, "DEL offenders");
 
   suspects = redisCommand(context, "KEYS *:*:count");
   if (suspects && suspects->type == REDIS_REPLY_ARRAY) {
@@ -59,8 +59,8 @@ void score(redisContext *context)
 
       score = redisCommand(context, "GET %s", suspects->element[i]->str);
       if (score && score->type == REDIS_REPLY_STRING) {
-        freeReplyObject(redisCommand(context, "ZINCRBY offenders %s %s", score->str, address));
-	freeReplyObject(score);
+        redisCommand(context, "ZINCRBY offenders %s %s", score->str, address);
+        freeReplyObject(score);
       }
     }
     freeReplyObject(suspects);

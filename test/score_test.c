@@ -15,16 +15,21 @@ void setup(void)
 
 void teardown(void)
 {
-  freeReplyObject(redisCommand(context, "flushdb"));
+  redisCommand(context, "flushdb");
+
   if (reply) {
     freeReplyObject(reply);
   }
+
   redisFree(context);
 }
 
 START_TEST(does_nothing_if_there_are_no_suspects)
 {
+  redisCommand(context, "DEL offenders");
+
   score(context);
+
   reply = redisCommand(context, "EXISTS offenders");
   ck_assert_int_eq(reply->integer, 0);
 }
@@ -32,8 +37,10 @@ END_TEST
 
 START_TEST(creates_offenders_key_of_type_zset)
 {
-  freeReplyObject(redisCommand(context, "SET 1.1.1.1:950001:count 10"));
+  redisCommand(context, "SET 1.1.1.1:950001:count 10");
+
   score(context);
+
   reply = redisCommand(context, "TYPE offenders");
   ck_assert_str_eq(reply->str, "zset");
 }
@@ -41,10 +48,12 @@ END_TEST
 
 START_TEST(does_not_score_blacklisted_actors)
 {
-  freeReplyObject(redisCommand(context, "SET 1.1.1.1:950001:count 10"));
-  freeReplyObject(redisCommand(context, "SET 1.1.1.2:950001:count 10"));
-  freeReplyObject(redisCommand(context, "SET 1.1.1.2:repsheet:blacklist true"));
+  redisCommand(context, "SET 1.1.1.1:950001:count 10");
+  redisCommand(context, "SET 1.1.1.2:950001:count 10");
+  redisCommand(context, "SET 1.1.1.2:repsheet:blacklist true");
+
   score(context);
+
   reply = redisCommand(context, "ZRANGE offenders 0 -1");
   ck_assert_int_eq(reply->elements, 1);
   ck_assert_str_eq(reply->element[0]->str, "1.1.1.1");
@@ -53,10 +62,12 @@ END_TEST
 
 START_TEST(does_not_score_whitelisted_actors)
 {
-  freeReplyObject(redisCommand(context, "SET 1.1.1.1:950001:count 10"));
-  freeReplyObject(redisCommand(context, "SET 1.1.1.2:950001:count 10"));
-  freeReplyObject(redisCommand(context, "SET 1.1.1.2:repsheet:whitelist true"));
+  redisCommand(context, "SET 1.1.1.1:950001:count 10");
+  redisCommand(context, "SET 1.1.1.2:950001:count 10");
+  redisCommand(context, "SET 1.1.1.2:repsheet:whitelist true");
+
   score(context);
+
   reply = redisCommand(context, "ZRANGE offenders 0 -1");
   ck_assert_int_eq(reply->elements, 1);
   ck_assert_str_eq(reply->element[0]->str, "1.1.1.1");
@@ -65,9 +76,11 @@ END_TEST
 
 START_TEST(accounts_for_all_offenses_of_an_actor)
 {
-  freeReplyObject(redisCommand(context, "SET 1.1.1.1:950001:count 10"));
-  freeReplyObject(redisCommand(context, "SET 1.1.1.1:960001:count 100"));
+  redisCommand(context, "SET 1.1.1.1:950001:count 10");
+  redisCommand(context, "SET 1.1.1.1:960001:count 100");
+
   score(context);
+
   reply = redisCommand(context, "ZSCORE offenders 1.1.1.1");
   ck_assert_str_eq(reply->str, "110");
 }
