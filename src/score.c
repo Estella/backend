@@ -35,10 +35,10 @@ static char *strip_address(char *key)
 void score(redisContext *context)
 {
   int i;
-  redisReply *blacklist, *score, *suspects;
+  redisReply *blacklist, *whitelist, *score, *suspects;
   char *address = malloc(16);
 
-  freeReplyObject(redisCommand(context, "DEL offenders"));
+  redisCommand(context, "DEL offenders");
 
   suspects = redisCommand(context, "KEYS *:*:count");
   if (suspects && suspects->type == REDIS_REPLY_ARRAY) {
@@ -51,9 +51,15 @@ void score(redisContext *context)
         continue;
       }
 
+      whitelist = redisCommand(context, "GET %s:repsheet:whitelist", address);
+      if (whitelist && (whitelist->type == REDIS_REPLY_STRING) && (strcmp(whitelist->str, "true") == 0)) {
+        freeReplyObject(whitelist);
+        continue;
+      }
+
       score = redisCommand(context, "GET %s", suspects->element[i]->str);
       if (score && score->type == REDIS_REPLY_STRING) {
-        freeReplyObject(redisCommand(context, "ZINCRBY offenders %s %s", score->str, address));
+        redisCommand(context, "ZINCRBY offenders %s %s", score->str, address);
         freeReplyObject(score);
       }
     }
