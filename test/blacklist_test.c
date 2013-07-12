@@ -19,10 +19,12 @@ void blacklist_setup(void)
 
 void blacklist_teardown(void)
 {
-  freeReplyObject(redisCommand(context, "flushdb"));
-  if (!reply == NULL) {
+  redisCommand(context, "flushdb");
+
+  if (reply) {
     freeReplyObject(reply);
   }
+
   redisFree(context);
 }
 
@@ -30,6 +32,7 @@ START_TEST(does_nothing_if_there_are_no_offenders)
 {
   score(context);
   blacklist(context, config);
+
   reply = redisCommand(context, "KEYS *:repsheet:blacklist");
   ck_assert_int_eq(reply->elements, 0);
 }
@@ -37,9 +40,11 @@ END_TEST
 
 START_TEST(does_not_delete_offenders_key)
 {
-  freeReplyObject(redisCommand(context, "SET 1.1.1.1:950001:count 10"));
+  redisCommand(context, "SET 1.1.1.1:950001:count 10");
+
   score(context);
   blacklist(context, config);
+
   reply = redisCommand(context, "EXISTS offenders");
   ck_assert_int_eq(reply->integer, 1);
 }
@@ -47,23 +52,64 @@ END_TEST
 
 START_TEST(does_not_blacklist_whitelisted_actors)
 {
-  freeReplyObject(redisCommand(context, "SET 1.1.1.1:950001:count 10"));
-  freeReplyObject(redisCommand(context, "SET 1.1.1.2:950001:count 10"));
-  freeReplyObject(redisCommand(context, "SET 1.1.1.1:repsheet:whitelist true"));
+  redisCommand(context, "SET 1.1.1.1:950001:count 10");
+  redisCommand(context, "SET 1.1.1.2:950001:count 10");
+  redisCommand(context, "SET 1.1.1.1:repsheet:whitelist true");
+
   score(context);
   blacklist(context, config);
+
   reply = redisCommand(context, "GET 1.1.1.2:repsheet:blacklist");
   ck_assert_int_eq(reply->type, REDIS_REPLY_STRING);
+
   reply = redisCommand(context, "EXISTS 1.1.1.1:repsheet:blacklist");
   ck_assert_int_eq(reply->integer, 0);
 }
 END_TEST
 
-START_TEST(expires_blacklist_keys)
+START_TEST(can_blacklist_multiple_offenders_at_once)
 {
-  freeReplyObject(redisCommand(context, "SET 1.1.1.1:950001:count 10"));
+  reply = redisCommand(context, "EXISTS 1.1.1.1:repsheet:blacklist");
+  ck_assert_int_eq(reply->integer, 0);
+
+  reply = redisCommand(context, "EXISTS 1.1.1.2:repsheet:blacklist");
+  ck_assert_int_eq(reply->integer, 0);
+
+  reply = redisCommand(context, "EXISTS 1.1.1.3:repsheet:blacklist");
+  ck_assert_int_eq(reply->integer, 0);
+
+  reply = redisCommand(context, "EXISTS 1.1.1.4:repsheet:blacklist");
+  ck_assert_int_eq(reply->integer, 0);
+
+  redisCommand(context, "SET 1.1.1.1:950001:count 10");
+  redisCommand(context, "SET 1.1.1.2:950001:count 10");
+  redisCommand(context, "SET 1.1.1.3:950001:count 10");
+  redisCommand(context, "SET 1.1.1.4:950001:count 10");
+
   score(context);
   blacklist(context, config);
+
+  reply = redisCommand(context, "EXISTS 1.1.1.1:repsheet:blacklist");
+  ck_assert_int_eq(reply->integer, 1);
+
+  reply = redisCommand(context, "EXISTS 1.1.1.2:repsheet:blacklist");
+  ck_assert_int_eq(reply->integer, 1);
+
+  reply = redisCommand(context, "EXISTS 1.1.1.3:repsheet:blacklist");
+  ck_assert_int_eq(reply->integer, 1);
+
+  reply = redisCommand(context, "EXISTS 1.1.1.4:repsheet:blacklist");
+  ck_assert_int_eq(reply->integer, 1);
+}
+END_TEST
+
+START_TEST(expires_blacklist_keys)
+{
+  redisCommand(context, "SET 1.1.1.1:950001:count 10");
+
+  score(context);
+  blacklist(context, config);
+
   reply = redisCommand(context, "TTL 1.1.1.1:repsheet:blacklist");
   ck_assert(reply->integer > 86300);
 }
@@ -78,6 +124,7 @@ Suite *make_blacklist_suite(void) {
   tcase_add_test(tc_blacklist, does_not_delete_offenders_key);
   tcase_add_test(tc_blacklist, does_not_blacklist_whitelisted_actors);
   tcase_add_test(tc_blacklist, expires_blacklist_keys);
+  tcase_add_test(tc_blacklist, can_blacklist_multiple_offenders_at_once);
   suite_add_tcase(suite, tc_blacklist);
 
   return suite;
