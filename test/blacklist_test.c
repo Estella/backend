@@ -41,7 +41,7 @@ END_TEST
 
 START_TEST(does_not_delete_offenders_key)
 {
-  redisCommand(context, "SET 1.1.1.1:950001:count 10");
+  redisCommand(context, "ZINCRBY 1.1.1.1:detected 10 950001");
 
   score(context);
   blacklist(context, config);
@@ -53,8 +53,8 @@ END_TEST
 
 START_TEST(does_not_blacklist_whitelisted_actors)
 {
-  redisCommand(context, "SET 1.1.1.1:950001:count 10");
-  redisCommand(context, "SET 1.1.1.2:950001:count 10");
+  redisCommand(context, "ZINCRBY 1.1.1.1:detected 10 950001");
+  redisCommand(context, "ZINCRBY 1.1.1.2:detected 10 950001");
   redisCommand(context, "SET 1.1.1.1:repsheet:whitelist true");
 
   score(context);
@@ -82,10 +82,10 @@ START_TEST(can_blacklist_multiple_offenders_at_once)
   reply = redisCommand(context, "EXISTS 1.1.1.4:repsheet:blacklist");
   ck_assert_int_eq(reply->integer, 0);
 
-  redisCommand(context, "SET 1.1.1.1:950001:count 10");
-  redisCommand(context, "SET 1.1.1.2:950001:count 10");
-  redisCommand(context, "SET 1.1.1.3:950001:count 10");
-  redisCommand(context, "SET 1.1.1.4:950001:count 10");
+  redisCommand(context, "ZINCRBY 1.1.1.1:detected 10 950001");
+  redisCommand(context, "ZINCRBY 1.1.1.2:detected 10 950001");
+  redisCommand(context, "ZINCRBY 1.1.1.3:detected 10 950001");
+  redisCommand(context, "ZINCRBY 1.1.1.4:detected 10 950001");
 
   score(context);
   blacklist(context, config);
@@ -106,7 +106,7 @@ END_TEST
 
 START_TEST(expires_blacklist_keys)
 {
-  redisCommand(context, "SET 1.1.1.1:950001:count 10");
+  redisCommand(context, "ZINCRBY 1.1.1.1:detected 10 950001");
 
   score(context);
   blacklist(context, config);
