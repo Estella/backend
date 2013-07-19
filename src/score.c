@@ -61,12 +61,12 @@ void score(redisContext *context)
       scores = redisCommand(context, "ZRANGE %s 0 -1 WITHSCORES", suspects->element[i]->str);
       if (scores && scores->type == REDIS_REPLY_ARRAY) {
         for(j = 1; j < scores->elements; j+=2) {
-	  total += atoi(scores->element[j]->str);
-	}
+          total += atoi(scores->element[j]->str);
+        }
         freeReplyObject(scores);
+        redisCommand(context, "ZINCRBY offenders %d %s", total, address);
+        total = 0;
       }
-      redisCommand(context, "ZINCRBY offenders %d %s", total, address);
-      total = 0;
     }
     freeReplyObject(suspects);
     free(address);
