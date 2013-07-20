@@ -15,7 +15,7 @@
 */
 
 #ifndef __BLACKLIST_H
-#define __BLACKLIST_H_H
+#define __BLACKLIST_H
 
 #include "repsheet.h"
 

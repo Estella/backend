@@ -14,27 +14,22 @@
   limitations under the License.
 */
 
-#ifndef __REPSHEET_H
-#define __REPSHEET_H
+#ifndef __UPSTREAM_H
+#define __UPSTREAM_H
 
-#define VERSION "0.11"
+#include "repsheet.h"
+#include <curl/curl.h>
+#include <json/json.h>
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <getopt.h>
+#define EMAIL getenv("CLOUDFLARE_EMAIL")
+#define TOKEN getenv("CLOUDFLARE_TOKEN")
 
-#include "hiredis/hiredis.h"
+typedef struct callback_buffer
+{
+  char * buffer;
+  size_t size;
+} callback_buffer;
 
-typedef struct config_t {
-  char *host;
-  int port;
-  int threshold;
-  int report;
-  int blacklist;
-  int score;
-  int expiry;
-  int upstream;
-} config_t;
+void publish_blacklist(redisContext *context);
 
 #endif

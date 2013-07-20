@@ -14,23 +14,8 @@
   limitations under the License.
 */
 
+#include "util.h"
 #include "score.h"
-
-static char *strip_address(char *key)
-{
-  char *ptr = strchr(key, ':');
-  if (ptr == NULL) {
-    return NULL;
-  }
-
-  int position = ptr - key;
-  char* address = (char*) malloc((position + 1) * sizeof(char));
-
-  memcpy(address, key, position);
-  address[position] = '\0';
-
-  return address;
-}
 
 void score(redisContext *context)
 {
