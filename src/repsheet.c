@@ -18,6 +18,7 @@
 #include "score.h"
 #include "report.h"
 #include "blacklist.h"
+#include "upstream.h"
 
 config_t config;
 
