@@ -14,27 +14,9 @@
   limitations under the License.
 */
 
-#ifndef __REPSHEET_H
-#define __REPSHEET_H
+#ifndef __UTIL_H
+#define __UTIL_H
 
-#define VERSION "0.11"
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <getopt.h>
-
-#include "hiredis/hiredis.h"
-
-typedef struct config_t {
-  char *host;
-  int port;
-  int threshold;
-  int report;
-  int blacklist;
-  int score;
-  int expiry;
-  int upstream;
-} config_t;
+char *strip_address(char *key);
 
 #endif
