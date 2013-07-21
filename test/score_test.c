@@ -37,7 +37,7 @@ END_TEST
 
 START_TEST(creates_offenders_key_of_type_zset)
 {
-  redisCommand(context, "SET 1.1.1.1:950001:count 10");
+  redisCommand(context, "ZINCRBY 1.1.1.1:detected 10 950001");
 
   score(context);
 
@@ -48,8 +48,8 @@ END_TEST
 
 START_TEST(does_not_score_blacklisted_actors)
 {
-  redisCommand(context, "SET 1.1.1.1:950001:count 10");
-  redisCommand(context, "SET 1.1.1.2:950001:count 10");
+  redisCommand(context, "ZINCRBY 1.1.1.1:detected 10 950001");
+  redisCommand(context, "ZINCRBY 1.1.1.2:detected 10 950001");
   redisCommand(context, "SET 1.1.1.2:repsheet:blacklist true");
 
   score(context);
@@ -62,8 +62,8 @@ END_TEST
 
 START_TEST(does_not_score_whitelisted_actors)
 {
-  redisCommand(context, "SET 1.1.1.1:950001:count 10");
-  redisCommand(context, "SET 1.1.1.2:950001:count 10");
+  redisCommand(context, "ZINCRBY 1.1.1.1:detected 10 950001");
+  redisCommand(context, "ZINCRBY 1.1.1.2:detected 10 950001");
   redisCommand(context, "SET 1.1.1.2:repsheet:whitelist true");
 
   score(context);
@@ -76,8 +76,8 @@ END_TEST
 
 START_TEST(accounts_for_all_offenses_of_an_actor)
 {
-  redisCommand(context, "SET 1.1.1.1:950001:count 10");
-  redisCommand(context, "SET 1.1.1.1:960001:count 100");
+  redisCommand(context, "ZINCRBY 1.1.1.1:detected 10 950001");
+  redisCommand(context, "ZINCRBY 1.1.1.1:detected 100 950001");
 
   score(context);
 
