@@ -1,3 +1,9 @@
+repsheet-backend (0.11-1) unstable-security; urgency=low
+
+  * Support for new key management strategy
+
+ -- Aaron Bedra <aaron@aaronbedra.com>  Sun, 21 Jul 2013 00:00:43 -0500
+
 repsheet-backend (0.10-1) unstable-security; urgency=low
 
   * Fixes for segfaults under heavy Redis load
