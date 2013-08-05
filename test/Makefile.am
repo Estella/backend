@@ -11,5 +11,5 @@ test_runner_SOURCES = test_runner.c    \
                       $(top_builddir)/src/report.h    \
                       $(top_builddir)/src/blacklist.c \
                       $(top_builddir)/src/blacklist.h
-test_runner_CFLAGS = $(CHECK_CFLAGS)
-test_runner_LDADD = $(CHECK_LIBS) -lhiredis -lcurl -ljson
+test_runner_CFLAGS = $(CHECK_CFLAGS) $(HIREDIS_CFLAGS) $(JSON_C_CFLAGS) $(LIBCURL_CFLAGS)
+test_runner_LDADD = $(CHECK_LIBS) $(HIREDIS_LIBS) $(JSON_C_LIBS) $(LIBCURL_LIBS)
