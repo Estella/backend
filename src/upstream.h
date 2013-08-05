@@ -23,6 +23,7 @@
 
 #define EMAIL getenv("CLOUDFLARE_EMAIL")
 #define TOKEN getenv("CLOUDFLARE_TOKEN")
+#define CLOUDFLARE_URL "https://www.cloudflare.com/api_json.html"
 
 typedef struct callback_buffer
 {
