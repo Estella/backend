@@ -21,7 +21,7 @@ void score(redisContext *context)
 {
   int i, j;
   int total = 0;
-  redisReply *blacklist, *whitelist, *scores, *suspects;
+  redisReply *ignore, *scores, *suspects;
   char *address = malloc(16);
 
   redisCommand(context, "DEL offenders");
@@ -31,15 +31,9 @@ void score(redisContext *context)
     for (i = 0; i < suspects->elements; i++) {
       address = strip_address(suspects->element[i]->str);
 
-      blacklist = redisCommand(context, "GET %s:repsheet:blacklist", address);
-      if (blacklist && (blacklist->type == REDIS_REPLY_STRING) && (strcmp(blacklist->str, "true") == 0)) {
-        freeReplyObject(blacklist);
-        continue;
-      }
-
-      whitelist = redisCommand(context, "GET %s:repsheet:whitelist", address);
-      if (whitelist && (whitelist->type == REDIS_REPLY_STRING) && (strcmp(whitelist->str, "true") == 0)) {
-        freeReplyObject(whitelist);
+      ignore = redisCommand(context, "KEYS %s:repsheet:*", address);
+      if (ignore && (ignore->type == REDIS_REPLY_ARRAY) && (ignore->elements > 0)) {
+        freeReplyObject(ignore);
         continue;
       }
 
