@@ -25,7 +25,7 @@ static int success(callback_buffer *response)
   json = json_tokener_parse(response->buffer);
   status = json_object_get_string(json_object_object_get(json, "result"));
 
-  if (status && strcmp(status, "success") == 0) {
+  if (status && strcasecmp(status, "success") == 0) {
     return 1;
   }
 
@@ -71,12 +71,12 @@ static void cloudflare_blacklist(char *address)
 
   if (!EMAIL) {
     printf("You must set the CLOUDFLARE_EMAIL environment variable\n");
-    return;
+    exit(1);
   }
 
   if (!TOKEN) {
     printf("You must set the CLOUDFLARE_TOKEN environment variable\n");
-    return;
+    exit(1);
   }
 
   curl_formadd(&post, &ptr, CURLFORM_COPYNAME, "a",     CURLFORM_COPYCONTENTS, "ban",     CURLFORM_END);
@@ -123,6 +123,7 @@ void publish_blacklist(redisContext *context) {
       cloudflare_blacklist(address);
     }
     freeReplyObject(blacklist);
-    free(address);
   }
+
+  free(address);
 }
