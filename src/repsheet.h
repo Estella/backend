@@ -17,7 +17,7 @@
 #ifndef __REPSHEET_H
 #define __REPSHEET_H
 
-#define VERSION "0.11"
+#define VERSION "0.12"
 
 #include <stdio.h>
 #include <stdlib.h>
