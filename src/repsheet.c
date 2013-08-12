@@ -43,7 +43,14 @@ redisContext *get_redis_context()
 static void print_usage()
 {
   printf("Repsheet Backend Version %s\n", VERSION);
-  printf("usage: repsheet [-h] [-p] [-sbr]\n  -h <redis host>\n  -p <redis port>\n  -s (score actors)\n  -r (report top 10 offenders)\n  -b (blacklist offenders)\n");
+  printf("usage: repsheet [-h] [-p] [-t] [-sbru]\n \
+ -h <redis host>\n \
+ -p <redis port>\n \
+ -t <blacklist threshold>\n \
+ -s (score actors)\n \
+ -r (report top 10 offenders)\n \
+ -b (blacklist offenders)\n \
+ -u (publish blacklist upstream to Cloudflare)\n");
 }
 
 int main(int argc, char *argv[])
@@ -101,7 +108,7 @@ int main(int argc, char *argv[])
   }
 
   if (!config.report && !config.blacklist && !config.score && !config.upstream) {
-    printf("No options specified, performing score operation.\nTo remove this message, specify -s (score) or [-r | -b | -u] (report, blacklist, or upstream)\n");
+    printf("No options specified, performing score operation only!\n");
     score(context);
   }
 
