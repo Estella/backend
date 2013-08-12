@@ -1,3 +1,9 @@
+repsheet-backend (0.12-1) unstable-security; urgency=low
+
+  * Introduces Cloudflare integration
+
+ -- Aaron Bedra <aaron.bedra@getbraintree.com>  Mon, 12 Aug 2013 09:22:00 -0500
+
 repsheet-backend (0.11-1) unstable-security; urgency=low
 
   * Support for new key management strategy
