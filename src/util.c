@@ -14,11 +14,21 @@
   limitations under the License.
 */
 
-#ifndef __BLACKLIST_H
-#define __BLACKLIST_H
+#include <stdlib.h>
+#include <string.h>
 
-#include "repsheet.h"
+char *strip_address(char *key)
+{
+  char *ptr = strchr(key, ':');
+  if (ptr == NULL) {
+    return NULL;
+  }
 
-void blacklist(redisContext *context, config_t config);
+  int position = ptr - key;
+  char* address = (char*) malloc((position + 1) * sizeof(char));
 
-#endif
+  memcpy(address, key, position);
+  address[position] = '\0';
+
+  return address;
+}

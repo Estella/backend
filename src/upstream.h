@@ -14,11 +14,23 @@
   limitations under the License.
 */
 
-#ifndef __BLACKLIST_H
-#define __BLACKLIST_H
+#ifndef __UPSTREAM_H
+#define __UPSTREAM_H
 
 #include "repsheet.h"
+#include <curl/curl.h>
+#include <json/json.h>
 
-void blacklist(redisContext *context, config_t config);
+#define EMAIL getenv("CLOUDFLARE_EMAIL")
+#define TOKEN getenv("CLOUDFLARE_TOKEN")
+#define CLOUDFLARE_URL "https://www.cloudflare.com/api_json.html"
+
+typedef struct callback_buffer
+{
+  char * buffer;
+  size_t size;
+} callback_buffer;
+
+void publish_blacklist(redisContext *context);
 
 #endif

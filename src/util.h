@@ -14,11 +14,9 @@
   limitations under the License.
 */
 
-#ifndef __BLACKLIST_H
-#define __BLACKLIST_H
+#ifndef __UTIL_H
+#define __UTIL_H
 
-#include "repsheet.h"
-
-void blacklist(redisContext *context, config_t config);
+char *strip_address(char *key);
 
 #endif

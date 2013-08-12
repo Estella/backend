@@ -17,7 +17,7 @@
 #ifndef __REPSHEET_H
 #define __REPSHEET_H
 
-#define VERSION "0.11"
+#define VERSION "0.12"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -34,6 +34,7 @@ typedef struct config_t {
   int blacklist;
   int score;
   int expiry;
+  int upstream;
 } config_t;
 
 #endif

@@ -11,6 +11,9 @@ AM_PROG_CC_C_O
 AC_PROG_LIBTOOL
 
 PKG_CHECK_MODULES([CHECK], [check >= 0.9.4])
+#PKG_CHECK_MODULES([HIREDIS], [hiredis >= 0.10.0])
+PKG_CHECK_MODULES([JSON_C], [json >= 0.9])
+PKG_CHECK_MODULES([LIBCURL], [libcurl >= 7.14])
 
 AC_CONFIG_FILES([
     Makefile
