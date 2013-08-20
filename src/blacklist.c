@@ -20,7 +20,7 @@ void blacklist(redisContext *context, config_t config)
 {
   int i;
   int printed = 0;
-  redisReply *offenders, *whitelist;
+  redisReply *offenders, *whitelist, *ttl;
 
   offenders = redisCommand(context, "ZRANGEBYSCORE offenders %d +inf", config.threshold);
   if (offenders && (offenders->type == REDIS_REPLY_ARRAY)) {
@@ -38,7 +38,15 @@ void blacklist(redisContext *context, config_t config)
       }
 
       redisCommand(context, "SET %s:repsheet:blacklist true", offenders->element[i]->str);
-      redisCommand(context, "EXPIRE %s:repsheet:blacklist %d", offenders->element[i]->str, config.expiry);
+
+      ttl = redisCommand(context, "TTL %s:requests", offenders->element[i]->str);
+      if (ttl && ttl->integer > 0) {
+        redisCommand(context, "EXPIRE %s:repsheet:blacklist %d", offenders->element[i]->str, ttl->integer);
+        freeReplyObject(ttl);
+      } else {
+        redisCommand(context, "EXPIRE %s:repsheet:blacklist %d", offenders->element[i]->str, config.expiry);
+      }
+
       printf("  %s\n", offenders->element[i]->str);
     }
     freeReplyObject(offenders);
