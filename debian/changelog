@@ -1,3 +1,9 @@
+repsheet-backend (1.0.0-1) unstable-security; urgency=low
+
+  * Sets TTL according to active TTL if possible
+
+ -- Aaron Bedra <abedra@debian>  Wed, 21 Aug 2013 16:38:27 -0500
+
 repsheet-backend (0.12-1) unstable-security; urgency=low
 
   * Introduces Cloudflare integration
