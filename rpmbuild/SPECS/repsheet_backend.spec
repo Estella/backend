@@ -1,6 +1,6 @@
 Summary: The backend for Repsheet
 Name: repsheet_backend
-Version: 0.12
+Version: 1.0.0
 Release: 1
 License: ASL 2.0
 Group: System Environment/Daemons
@@ -35,6 +35,8 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/repsheet
 
 %changelog
+* Tue Aug 22 2013 Aaron Bedra <aaron.bedra@braintreepayments.com> - 1.0.0-1
+- Move to SEMVER. Blacklisting now matches current TTL
 * Mon Aug 12 2013 Aaron Bedra <aaron.bedra@braintreepayments.com> - 0.12-1
 - Introduces Cloudflare integration
 * Sat Jul 20 2013 Aaron Bedra <aaron@aaronbedra.com> - 0.11-1
