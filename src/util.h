@@ -17,6 +17,14 @@
 #ifndef __UTIL_H
 #define __UTIL_H
 
+#include <stdlib.h>
+
+typedef struct callback_buffer
+{
+  char * buffer;
+  size_t size;
+} callback_buffer;
+
 char *strip_address(char *key);
 
 #endif

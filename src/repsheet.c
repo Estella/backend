@@ -19,6 +19,7 @@
 #include "report.h"
 #include "blacklist.h"
 #include "upstream.h"
+#include "ofdp.h"
 
 config_t config;
 
@@ -43,14 +44,15 @@ redisContext *get_redis_context()
 static void print_usage()
 {
   printf("Repsheet Backend Version %s\n", VERSION);
-  printf("usage: repsheet [-h] [-p] [-t] [-sbru]\n \
+  printf("usage: repsheet [-h] [-p] [-t] [-sbruo]\n \
  -h <redis host>\n \
  -p <redis port>\n \
  -t <blacklist threshold>\n \
  -s (score actors)\n \
  -r (report top 10 offenders)\n \
  -b (blacklist offenders)\n \
- -u (publish blacklist upstream to Cloudflare)\n");
+ -u (publish blacklist upstream to Cloudflare)\n \
+ -o (score/blacklist actors against wafsec.com)\n");
 }
 
 int main(int argc, char *argv[])
@@ -66,8 +68,9 @@ int main(int argc, char *argv[])
   config.blacklist = 0;
   config.expiry = (24 * 60 * 60);
   config.upstream = 0;
+  config.ofdp = 0;
 
-  while((c = getopt (argc, argv, "h:p:t:srbvu")) != -1)
+  while((c = getopt (argc, argv, "h:p:t:srbvuo")) != -1)
     switch(c)
       {
       case 'h':
@@ -91,6 +94,9 @@ int main(int argc, char *argv[])
       case 'u':
         config.upstream = 1;
         break;
+      case 'o':
+	config.ofdp = 1;
+	break;
       case 'v':
         print_usage();
         return 0;
@@ -107,7 +113,7 @@ int main(int argc, char *argv[])
     return -1;
   }
 
-  if (!config.report && !config.blacklist && !config.score && !config.upstream) {
+  if (!config.report && !config.blacklist && !config.score && !config.upstream && !config.ofdp) {
     printf("No options specified, performing score operation only!\n");
     score(context);
   }
@@ -129,6 +135,11 @@ int main(int argc, char *argv[])
   if (config.report) {
     score(context);
     report(context, config);
+  }
+
+  if (config.ofdp) {
+    score(context);
+    ofdp_lookup_offenders(context);
   }
 
   redisFree(context);
