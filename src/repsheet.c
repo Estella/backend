@@ -44,14 +44,15 @@ redisContext *get_redis_context()
 static void print_usage()
 {
   printf("Repsheet Backend Version %s\n", VERSION);
-  printf("usage: repsheet [-h] [-p] [-t] [-sbru]\n \
+  printf("usage: repsheet [-h] [-p] [-t] [-sbruo]\n \
  -h <redis host>\n \
  -p <redis port>\n \
  -t <blacklist threshold>\n \
  -s (score actors)\n \
  -r (report top 10 offenders)\n \
  -b (blacklist offenders)\n \
- -u (publish blacklist upstream to Cloudflare)\n");
+ -u (publish blacklist upstream to Cloudflare)\n \
+ -o (score/blacklist actors against wafsec.com)\n");
 }
 
 int main(int argc, char *argv[])
