@@ -14,6 +14,7 @@
   limitations under the License.
 */
 
+#include "util.h"
 #include "blacklist.h"
 
 void blacklist(redisContext *context, config_t config)

@@ -14,28 +14,18 @@
   limitations under the License.
 */
 
-#ifndef __REPSHEET_H
-#define __REPSHEET_H
+#ifndef __OFDP_H
+#define __OFDP_H
 
-#define VERSION "1.1.0"
+#include <curl/curl.h>
+#include "util.h"
+#include "repsheet.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <getopt.h>
+#define OFDP_URL "http://wafsec.com/api?ip="
+#define OFDP_SCORE_XPATH "/wafsec/score"
 
-#include "hiredis/hiredis.h"
-
-typedef struct config_t {
-  char *host;
-  int port;
-  int threshold;
-  int report;
-  int blacklist;
-  int score;
-  int expiry;
-  int upstream;
-  int ofdp;
-} config_t;
+int ofdp_score(callback_buffer response);
+callback_buffer ofdp_lookup(char *address);
+void ofdp_lookup_offenders(redisContext *context);
 
 #endif
