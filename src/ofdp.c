@@ -11,11 +11,14 @@
 
 int ofdp_score(callback_buffer response)
 {
+  if (response.size == 0) {
+    return 0;
+  }
+
   xmlDocPtr doc;
   xmlXPathObjectPtr xpathObj;
   xmlNodeSetPtr nodes;
   xmlXPathContextPtr xpathCtx;
-  const char *query = "/wafsec/score";
   int size, score;
 
   xmlInitParser();
@@ -23,22 +26,12 @@ int ofdp_score(callback_buffer response)
   doc = xmlParseMemory(response.buffer, response.size);
 
   xpathCtx = xmlXPathNewContext(doc);
-  if (xpathCtx == NULL) {
-    printf("Error: unable to create new XPath context\n");
-    return 0;
-  }
-
-  xpathObj = xmlXPathEvalExpression((xmlChar *)query, xpathCtx);
-  if (xpathObj == NULL) {
-    printf("Error: unable to evaluate xpath expression \"%s\"\n", query);
-    xmlXPathFreeContext(xpathCtx);
-    return 0;
-  }
+  xpathObj = xmlXPathEvalExpression((xmlChar *)OFDP_SCORE_XPATH, xpathCtx);
 
   nodes = xpathObj->nodesetval;
   size = (nodes) ? nodes->nodeNr : 0;
 
-  if (size == 0) {
+  if (size == 0 || size > 1) {
     score = 0;
   } else {
     score = atoi((char *)xmlNodeGetContent(nodes->nodeTab[0]));
@@ -76,9 +69,10 @@ callback_buffer ofdp_lookup(char *address)
   CURL *curl;
   CURLcode res;
   callback_buffer response;
+  char *full_url;
+
   response.buffer = NULL;
   response.size = 0;
-  char *full_url;
 
   full_url = malloc(strlen(OFDP_URL) + strlen(address) + 1);
   sprintf(full_url, "%s%s", OFDP_URL, address);
@@ -92,13 +86,10 @@ callback_buffer ofdp_lookup(char *address)
 
     res = curl_easy_perform(curl);
 
-    if (res != CURLE_OK) {
-      printf("curl failed: %s\n", curl_easy_strerror(res));
-    }
-
     curl_easy_cleanup(curl);
   }
 
+  free(full_url);
   return response;
 }
 

@@ -20,6 +20,7 @@
 #include <curl/curl.h>
 
 #define OFDP_URL "http://wafsec.com/api?ip="
+#define OFDP_SCORE_XPATH "/wafsec/score"
 
 typedef struct callback_buffer
 {
