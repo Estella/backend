@@ -97,11 +97,16 @@ void ofdp_lookup_offenders(redisContext *context)
 {
   int i, wafsec_score;
   char *address = malloc(16);
-  redisReply *offenders, *score;
+  redisReply *offenders, *score, *noop;
 
   offenders = redisCommand(context, "ZRANGEBYSCORE offenders 0 +inf");
   if (offenders && (offenders->type == REDIS_REPLY_ARRAY)) {
     for (i = 0; i < offenders->elements; i++) {
+      noop = redisCommand(context, "KEYS %s:repsheet:*", offenders->element[i]->str);
+      if (noop && (noop->elements > 0)) {
+	freeReplyObject(noop);
+	continue;
+      }
       score = redisCommand(context, "GET %s:score", offenders->element[i]->str);
       if (score && (score->type != REDIS_REPLY_NIL)) {
         freeReplyObject(score);
