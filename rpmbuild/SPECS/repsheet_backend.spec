@@ -1,6 +1,6 @@
 Summary: The backend for Repsheet
 Name: repsheet_backend
-Version: 1.0.0
+Version: 1.1.0
 Release: 1
 License: ASL 2.0
 Group: System Environment/Daemons
@@ -8,7 +8,7 @@ URL: https://github.com/repsheet/backend
 Source0: http://getrepsheet.com/releases/backend/%{name}-%{version}.zip
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 Requires: hiredis
-BuildRequires: pcre-devel hiredis-devel gcc
+BuildRequires: pcre-devel hiredis-devel gcc libxml2-devel libcurl-devel json-c-devel
 
 %description 
 This tool performs the heavy lifting for scoring and auto
@@ -35,6 +35,8 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/repsheet
 
 %changelog
+* Wed Oct 09 2013 Aaron Bedra <aaron.bedra@braintreepayments.com> - 1.1.0-1
+- Adds OFDP integration
 * Tue Aug 22 2013 Aaron Bedra <aaron.bedra@braintreepayments.com> - 1.0.0-1
 - Move to SEMVER. Blacklisting now matches current TTL
 * Mon Aug 12 2013 Aaron Bedra <aaron.bedra@braintreepayments.com> - 0.12-1
