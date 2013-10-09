@@ -1,4 +1,6 @@
 #include <stdlib.h>
+#include "../src/repsheet.h"
+#include "../src/upstream.h"
 #include "../src/ofdp.h"
 #include "test_suite.h"
 
@@ -41,7 +43,6 @@ void ofdp_teardown(void)
 
 START_TEST(properly_finds_the_score_in_the_response)
 {
-  printf("\n\n%s\n", data.buffer);
   int score = ofdp_score(data);
   ck_assert_int_eq(score, 296);
 }

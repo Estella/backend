@@ -18,17 +18,14 @@
 #define __OFDP_H
 
 #include <curl/curl.h>
+#include "util.h"
+#include "repsheet.h"
 
 #define OFDP_URL "http://wafsec.com/api?ip="
 #define OFDP_SCORE_XPATH "/wafsec/score"
 
-typedef struct callback_buffer
-{
-  char * buffer;
-  size_t size;
-} callback_buffer;
-
 int ofdp_score(callback_buffer response);
 callback_buffer ofdp_lookup(char *address);
+void ofdp_lookup_offenders(redisContext *context);
 
 #endif

@@ -35,6 +35,7 @@ typedef struct config_t {
   int score;
   int expiry;
   int upstream;
+  int ofdp;
 } config_t;
 
 #endif

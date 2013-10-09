@@ -25,12 +25,6 @@
 #define TOKEN getenv("CLOUDFLARE_TOKEN")
 #define CLOUDFLARE_URL "https://www.cloudflare.com/api_json.html"
 
-typedef struct callback_buffer
-{
-  char * buffer;
-  size_t size;
-} callback_buffer;
-
 void publish_blacklist(redisContext *context);
 
 #endif

@@ -19,7 +19,7 @@ int ofdp_score(callback_buffer response)
   xmlXPathObjectPtr xpathObj;
   xmlNodeSetPtr nodes;
   xmlXPathContextPtr xpathCtx;
-  int size, score;
+  int size, score = 0;
 
   xmlInitParser();
 
@@ -93,13 +93,38 @@ callback_buffer ofdp_lookup(char *address)
   return response;
 }
 
-/*
-int main(int argc, char *argv[])
+void ofdp_lookup_offenders(redisContext *context)
 {
+  int i, wafsec_score;
+  char *address = malloc(16);
+  redisReply *offenders, *score;
+
+  offenders = redisCommand(context, "ZRANGEBYSCORE offenders 0 +inf");
+  if (offenders && (offenders->type == REDIS_REPLY_ARRAY)) {
+    for (i = 0; i < offenders->elements; i++) {
+      score = redisCommand(context, "GET %s:score", offenders->element[i]->str);
+      if (score && (score->type != REDIS_REPLY_NIL)) {
+        freeReplyObject(score);
+        continue;
+      }
+      wafsec_score = ofdp_score(ofdp_lookup(offenders->element[i]->str));
+      if (wafsec_score > 5) {
+        redisCommand(context, "SET %s:repsheet:blacklist true", offenders->element[i]->str);
+        redisCommand(context, "SET %s:score %d", offenders->element[i]->str, wafsec_score);
+        printf("Actor %s has been blacklisted due to high OFDP risk (Score: %d)\n", offenders->element[i]->str, wafsec_score);
+      }
+    }
+    freeReplyObject(offenders);
+  }
+}
+
+/*
+  int main(int argc, char *argv[])
+  {
   int score = ofdp_score(ofdp_lookup(argv[1]));
   printf("%d\n", score);
   return 0;
-}
+  }
 */
 
 //gcc -Wall ofdp.c -o ofdp -I/usr/include/libxml2 -lxml2 -lcurl
