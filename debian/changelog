@@ -1,3 +1,9 @@
+repsheet-backend (1.1.0-1) unstable-security; urgency=low
+
+  * Adds OFDP integration
+
+ -- Aaron Bedra <abedra@debian>  Wed, 09 Oct 2013 14:30:53 -0500
+
 repsheet-backend (1.0.0-1) unstable-security; urgency=low
 
   * Sets TTL according to active TTL if possible
