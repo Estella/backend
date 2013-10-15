@@ -20,6 +20,7 @@
 #include "blacklist.h"
 #include "upstream.h"
 #include "ofdp.h"
+#include "cli.h"
 
 config_t config;
 
@@ -57,7 +58,8 @@ static void print_usage()
 
 int main(int argc, char *argv[])
 {
-  int c, ofdp_threshold, blacklist_threshold;
+  int c;
+  long ofdp_threshold, blacklist_threshold, redis_port;
   redisContext *context;
 
   config.host = "localhost";
@@ -78,10 +80,20 @@ int main(int argc, char *argv[])
         config.host = optarg;
         break;
       case 'p':
-        config.port = atoi(optarg);
+	redis_port = process_command_line_argument(optarg);
+	if (redis_port != INVALID_ARGUMENT_ERROR) {
+	  config.port = redis_port;
+	} else {
+	  printf("Redis port must be between 1 and %d, defaulting to %d\n", USHRT_MAX, config.port);
+	}
         break;
       case 't':
-        config.threshold = atoi(optarg);
+	blacklist_threshold = process_command_line_argument(optarg);
+	if (blacklist_threshold != INVALID_ARGUMENT_ERROR) {
+	  config.threshold = blacklist_threshold;
+	} else {
+	  printf("ModSecurity threshold must be between 1 and %d, defaulting to %d\n", USHRT_MAX, config.threshold);
+	}
         break;
       case 's':
         config.score = 1;
@@ -97,8 +109,11 @@ int main(int argc, char *argv[])
         break;
       case 'o':
 	config.ofdp = 1;
-	if (atoi(optarg) > 0) {
-	  config.ofdp_threshold = atoi(optarg);
+	ofdp_threshold = process_command_line_argument(optarg);
+	if (ofdp_threshold != INVALID_ARGUMENT_ERROR) {
+	  config.ofdp_threshold = ofdp_threshold;
+	} else {
+	  printf("OFDP threshold must be between 1 and %d, defaulting to %d\n", USHRT_MAX, config.ofdp_threshold);
 	}
 	break;
       case 'v':
