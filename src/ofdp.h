@@ -26,6 +26,6 @@
 
 int ofdp_score(callback_buffer response);
 callback_buffer ofdp_lookup(char *address);
-void ofdp_lookup_offenders(redisContext *context);
+void ofdp_lookup_offenders(redisContext *context, config_t config);
 
 #endif

@@ -93,7 +93,7 @@ callback_buffer ofdp_lookup(char *address)
   return response;
 }
 
-void ofdp_lookup_offenders(redisContext *context)
+void ofdp_lookup_offenders(redisContext *context, config_t config)
 {
   int i, wafsec_score;
   char *address = malloc(16);
@@ -114,7 +114,7 @@ void ofdp_lookup_offenders(redisContext *context)
       }
       wafsec_score = ofdp_score(ofdp_lookup(offenders->element[i]->str));
       redisCommand(context, "SET %s:score %d", offenders->element[i]->str, wafsec_score);
-      if (wafsec_score > 5) {
+      if (wafsec_score > config.ofdp_threshold) {
         redisCommand(context, "SET %s:repsheet:blacklist true", offenders->element[i]->str);
         printf("Actor %s has been blacklisted due to high OFDP risk (Score: %d)\n", offenders->element[i]->str, wafsec_score);
       }

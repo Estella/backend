@@ -36,6 +36,7 @@ typedef struct config_t {
   int expiry;
   int upstream;
   int ofdp;
+  int ofdp_threshold;
 } config_t;
 
 #endif

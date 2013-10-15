@@ -52,12 +52,12 @@ static void print_usage()
  -r (report top 10 offenders)\n \
  -b (blacklist offenders)\n \
  -u (publish blacklist upstream to Cloudflare)\n \
- -o (score/blacklist actors against wafsec.com)\n");
+ -o <ofdp score threshold> (score/blacklist actors against wafsec.com)\n");
 }
 
 int main(int argc, char *argv[])
 {
-  int c;
+  int c, ofdp_threshold, blacklist_threshold;
   redisContext *context;
 
   config.host = "localhost";
@@ -69,8 +69,9 @@ int main(int argc, char *argv[])
   config.expiry = (24 * 60 * 60);
   config.upstream = 0;
   config.ofdp = 0;
+  config.ofdp_threshold = 5;
 
-  while((c = getopt (argc, argv, "h:p:t:srbvuo")) != -1)
+  while((c = getopt (argc, argv, "h:p:t:srbvuo:")) != -1)
     switch(c)
       {
       case 'h':
@@ -96,6 +97,9 @@ int main(int argc, char *argv[])
         break;
       case 'o':
 	config.ofdp = 1;
+	if (atoi(optarg) > 0) {
+	  config.ofdp_threshold = atoi(optarg);
+	}
 	break;
       case 'v':
         print_usage();
@@ -139,7 +143,7 @@ int main(int argc, char *argv[])
 
   if (config.ofdp) {
     score(context);
-    ofdp_lookup_offenders(context);
+    ofdp_lookup_offenders(context, config);
   }
 
   redisFree(context);
