@@ -14,7 +14,6 @@ PKG_CHECK_MODULES([CHECK], [check >= 0.9.4])
 #PKG_CHECK_MODULES([HIREDIS], [hiredis >= 0.10.0])
 PKG_CHECK_MODULES([JSON_C], [json >= 0.9])
 PKG_CHECK_MODULES([LIBCURL], [libcurl >= 7.14])
-PKG_CHECK_MODULES([XML2], [libxml-2.0 >= 2.7.0])
 
 AC_CONFIG_FILES([
     Makefile

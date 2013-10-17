@@ -18,14 +18,14 @@
 #define __OFDP_H
 
 #include <curl/curl.h>
+#include <json/json.h>
+#include <errno.h>
 #include "util.h"
 #include "repsheet.h"
 
-#define OFDP_URL "http://wafsec.com/api?ip="
-#define OFDP_SCORE_XPATH "/wafsec/score"
+#define OFDP_URL "http://wafsec.com/api?lean=true&ip="
 
 int ofdp_score(callback_buffer response);
-callback_buffer ofdp_lookup(char *address);
 void ofdp_lookup_offenders(redisContext *context, config_t config);
 
 #endif

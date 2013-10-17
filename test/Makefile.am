@@ -17,5 +17,5 @@ test_runner_SOURCES = test_runner.c    \
                       ../src/ofdp.c      \
                       ../src/cli.h       \
                       ../src/cli.c
-test_runner_CFLAGS = $(CHECK_CFLAGS) $(JSON_C_CFLAGS) $(LIBCURL_CFLAGS) $(XML2_CFLAGS)
-test_runner_LDADD = $(CHECK_LIBS) $(JSON_C_LIBS) $(LIBCURL_LIBS) $(XML2_LIBS) -lhiredis
+test_runner_CFLAGS = $(CHECK_CFLAGS) $(JSON_C_CFLAGS) $(LIBCURL_CFLAGS)
+test_runner_LDADD = $(CHECK_LIBS) $(JSON_C_LIBS) $(LIBCURL_LIBS) -lhiredis

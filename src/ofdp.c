@@ -1,47 +1,16 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <libxml/tree.h>
-#include <libxml/parser.h>
-#include <libxml/xpath.h>
-#include <libxml/xpathInternals.h>
-#include <curl/curl.h>
-
 #include "ofdp.h"
 
 int ofdp_score(callback_buffer response)
 {
-  if (response.size == 0) {
+  struct json_object *json;
+  long score;
+
+  json = json_tokener_parse(response.buffer);
+  score = strtol(json_object_get_string(json_object_object_get(json, "score")), 0, 10);
+
+  if (errno == ERANGE || score <= 0 || score > USHRT_MAX) {
     return 0;
   }
-
-  xmlDocPtr doc;
-  xmlXPathObjectPtr xpathObj;
-  xmlNodeSetPtr nodes;
-  xmlXPathContextPtr xpathCtx;
-  int size, score = 0;
-
-  xmlInitParser();
-
-  doc = xmlParseMemory(response.buffer, response.size);
-
-  xpathCtx = xmlXPathNewContext(doc);
-  xpathObj = xmlXPathEvalExpression((xmlChar *)OFDP_SCORE_XPATH, xpathCtx);
-
-  nodes = xpathObj->nodesetval;
-  size = (nodes) ? nodes->nodeNr : 0;
-
-  if (size == 0 || size > 1) {
-    score = 0;
-  } else {
-    score = atoi((char *)xmlNodeGetContent(nodes->nodeTab[0]));
-  }
-
-  xmlXPathFreeContext(xpathCtx);
-  xmlXPathFreeObject(xpathObj);
-  xmlFreeDoc(doc);
-  xmlCleanupParser();
-  xmlMemoryDump();
 
   return score;
 }
@@ -64,8 +33,6 @@ static size_t ofdp_callback(void *ptr, size_t size, size_t nmemb, void *data)
 
 callback_buffer ofdp_lookup(char *address)
 {
-  // curl "http://wafsec.com/api?ip=<ip_address>
-
   CURL *curl;
   CURLcode res;
   callback_buffer response;
