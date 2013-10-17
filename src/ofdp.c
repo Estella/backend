@@ -1,47 +1,16 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <libxml/tree.h>
-#include <libxml/parser.h>
-#include <libxml/xpath.h>
-#include <libxml/xpathInternals.h>
-#include <curl/curl.h>
-
 #include "ofdp.h"
 
 int ofdp_score(callback_buffer response)
 {
-  if (response.size == 0) {
+  struct json_object *json;
+  long score;
+
+  json = json_tokener_parse(response.buffer);
+  score = strtol(json_object_get_string(json_object_object_get(json, "score")), 0, 10);
+
+  if (errno == ERANGE || score <= 0 || score > USHRT_MAX) {
     return 0;
   }
-
-  xmlDocPtr doc;
-  xmlXPathObjectPtr xpathObj;
-  xmlNodeSetPtr nodes;
-  xmlXPathContextPtr xpathCtx;
-  int size, score = 0;
-
-  xmlInitParser();
-
-  doc = xmlParseMemory(response.buffer, response.size);
-
-  xpathCtx = xmlXPathNewContext(doc);
-  xpathObj = xmlXPathEvalExpression((xmlChar *)OFDP_SCORE_XPATH, xpathCtx);
-
-  nodes = xpathObj->nodesetval;
-  size = (nodes) ? nodes->nodeNr : 0;
-
-  if (size == 0 || size > 1) {
-    score = 0;
-  } else {
-    score = atoi((char *)xmlNodeGetContent(nodes->nodeTab[0]));
-  }
-
-  xmlXPathFreeContext(xpathCtx);
-  xmlXPathFreeObject(xpathObj);
-  xmlFreeDoc(doc);
-  xmlCleanupParser();
-  xmlMemoryDump();
 
   return score;
 }
@@ -64,8 +33,6 @@ static size_t ofdp_callback(void *ptr, size_t size, size_t nmemb, void *data)
 
 callback_buffer ofdp_lookup(char *address)
 {
-  // curl "http://wafsec.com/api?ip=<ip_address>
-
   CURL *curl;
   CURLcode res;
   callback_buffer response;
@@ -93,7 +60,7 @@ callback_buffer ofdp_lookup(char *address)
   return response;
 }
 
-void ofdp_lookup_offenders(redisContext *context)
+void ofdp_lookup_offenders(redisContext *context, config_t config)
 {
   int i, wafsec_score;
   char *address = malloc(16);
@@ -113,23 +80,12 @@ void ofdp_lookup_offenders(redisContext *context)
         continue;
       }
       wafsec_score = ofdp_score(ofdp_lookup(offenders->element[i]->str));
-      if (wafsec_score > 5) {
+      redisCommand(context, "SET %s:score %d", offenders->element[i]->str, wafsec_score);
+      if (wafsec_score > config.ofdp_threshold) {
         redisCommand(context, "SET %s:repsheet:blacklist true", offenders->element[i]->str);
-        redisCommand(context, "SET %s:score %d", offenders->element[i]->str, wafsec_score);
         printf("Actor %s has been blacklisted due to high OFDP risk (Score: %d)\n", offenders->element[i]->str, wafsec_score);
       }
     }
     freeReplyObject(offenders);
   }
 }
-
-/*
-  int main(int argc, char *argv[])
-  {
-  int score = ofdp_score(ofdp_lookup(argv[1]));
-  printf("%d\n", score);
-  return 0;
-  }
-*/
-
-//gcc -Wall ofdp.c -o ofdp -I/usr/include/libxml2 -lxml2 -lcurl

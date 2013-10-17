@@ -17,7 +17,7 @@
 #ifndef __REPSHEET_H
 #define __REPSHEET_H
 
-#define VERSION "1.1.0"
+#define VERSION "1.2.0"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -36,6 +36,7 @@ typedef struct config_t {
   int expiry;
   int upstream;
   int ofdp;
+  int ofdp_threshold;
 } config_t;
 
 #endif
