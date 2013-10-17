@@ -17,8 +17,6 @@
 #ifndef __CLI_H
 #define __CLI_H
 
-#define VERSION "1.1.0"
-
 #include <stdlib.h>
 #include <limits.h>
 #include <errno.h>
