@@ -2,11 +2,11 @@ Source: repsheet-backend
 Section: utils
 Priority: optional
 Maintainer: Aaron Bedra <aaron.bedra@getbraintree.com>
-Build-Depends: debhelper (>> 8), libhiredis-dev, libjson0-dev, libxml2-dev, libcurl4-openssl-dev | libcurl4-openssl-dev
+Build-Depends: debhelper (>> 8), libhiredis-dev, libjson0-dev, libcurl4-openssl-dev | libcurl4-openssl-dev
 Standards-Version: 3.9.1
 
 Package: repsheet-backend
 Architecture: any
-Depends: libhiredis0.10, libcurl3, libjson0, libxml2, ${shlibs:Depends}, ${misc:Depends}
+Depends: libhiredis0.10, libcurl3, libjson0, ${shlibs:Depends}, ${misc:Depends}
 Description: The backend for Repsheet.
  This tool performs the heavy lifting for scoring and auto blacklisting offenders on the Repsheet

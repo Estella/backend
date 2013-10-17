@@ -1,3 +1,9 @@
+repsheet-backend (1.2.0-1) unstable-security; urgency=low
+
+  * Move OFDP to JSON API. OFDP related fixes.
+
+ -- Aaron Bedra <abedra@debian>  Thu, 17 Oct 2013 13:45:00 -0500
+
 repsheet-backend (1.1.0-1) unstable-security; urgency=low
 
   * Adds OFDP integration
