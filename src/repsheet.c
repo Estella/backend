@@ -20,6 +20,7 @@
 #include "blacklist.h"
 #include "upstream.h"
 #include "ofdp.h"
+#include "cli.h"
 
 config_t config;
 
@@ -52,12 +53,13 @@ static void print_usage()
  -r (report top 10 offenders)\n \
  -b (blacklist offenders)\n \
  -u (publish blacklist upstream to Cloudflare)\n \
- -o (score/blacklist actors against wafsec.com)\n");
+ -o <ofdp score threshold> (score/blacklist actors against wafsec.com)\n");
 }
 
 int main(int argc, char *argv[])
 {
   int c;
+  long ofdp_threshold, blacklist_threshold, redis_port;
   redisContext *context;
 
   config.host = "localhost";
@@ -69,18 +71,29 @@ int main(int argc, char *argv[])
   config.expiry = (24 * 60 * 60);
   config.upstream = 0;
   config.ofdp = 0;
+  config.ofdp_threshold = 5;
 
-  while((c = getopt (argc, argv, "h:p:t:srbvuo")) != -1)
+  while((c = getopt (argc, argv, "h:p:t:srbvuo:")) != -1)
     switch(c)
       {
       case 'h':
         config.host = optarg;
         break;
       case 'p':
-        config.port = atoi(optarg);
+	redis_port = process_command_line_argument(optarg);
+	if (redis_port != INVALID_ARGUMENT_ERROR) {
+	  config.port = redis_port;
+	} else {
+	  printf("Redis port must be between 1 and %d, defaulting to %d\n", USHRT_MAX, config.port);
+	}
         break;
       case 't':
-        config.threshold = atoi(optarg);
+	blacklist_threshold = process_command_line_argument(optarg);
+	if (blacklist_threshold != INVALID_ARGUMENT_ERROR) {
+	  config.threshold = blacklist_threshold;
+	} else {
+	  printf("ModSecurity threshold must be between 1 and %d, defaulting to %d\n", USHRT_MAX, config.threshold);
+	}
         break;
       case 's':
         config.score = 1;
@@ -96,6 +109,12 @@ int main(int argc, char *argv[])
         break;
       case 'o':
 	config.ofdp = 1;
+	ofdp_threshold = process_command_line_argument(optarg);
+	if (ofdp_threshold != INVALID_ARGUMENT_ERROR) {
+	  config.ofdp_threshold = ofdp_threshold;
+	} else {
+	  printf("OFDP threshold must be between 1 and %d, defaulting to %d\n", USHRT_MAX, config.ofdp_threshold);
+	}
 	break;
       case 'v':
         print_usage();
@@ -139,7 +158,7 @@ int main(int argc, char *argv[])
 
   if (config.ofdp) {
     score(context);
-    ofdp_lookup_offenders(context);
+    ofdp_lookup_offenders(context, config);
   }
 
   redisFree(context);

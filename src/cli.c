@@ -14,18 +14,17 @@
   limitations under the License.
 */
 
-#ifndef __OFDP_H
-#define __OFDP_H
+#include "cli.h"
 
-#include <curl/curl.h>
-#include <json/json.h>
-#include <errno.h>
-#include "util.h"
-#include "repsheet.h"
+long process_command_line_argument(char *arg)
+{
+  long result;
 
-#define OFDP_URL "http://wafsec.com/api?lean=true&ip="
+  result = strtol(arg, 0, 10);
 
-int ofdp_score(callback_buffer response);
-void ofdp_lookup_offenders(redisContext *context, config_t config);
+  if (errno == ERANGE || result <= 0 || result > USHRT_MAX) {
+    return INVALID_ARGUMENT_ERROR;
+  }
 
-#endif
+  return result;
+}
