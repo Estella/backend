@@ -114,16 +114,12 @@ static void cloudflare_blacklist(char *address)
 void publish_blacklist(redisContext *context) {
   int i;
   redisReply *blacklist;
-  char *address = malloc(16);
 
   blacklist = redisCommand(context, "KEYS *:repsheet:blacklist");
   if (blacklist && blacklist->type == REDIS_REPLY_ARRAY) {
     for(i = 0; i < blacklist->elements; i++) {
-      address = strip_address(blacklist->element[i]->str);
-      cloudflare_blacklist(address);
+      cloudflare_blacklist(strip_address(blacklist->element[i]->str));
     }
     freeReplyObject(blacklist);
   }
-
-  free(address);
 }

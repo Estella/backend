@@ -22,16 +22,13 @@ void score(redisContext *context)
   int i, j;
   int total = 0;
   redisReply *ignore, *scores, *suspects;
-  char *address = malloc(16);
 
   redisCommand(context, "DEL offenders");
 
   suspects = redisCommand(context, "KEYS *:detected");
   if (suspects && suspects->type == REDIS_REPLY_ARRAY) {
     for (i = 0; i < suspects->elements; i++) {
-      address = strip_address(suspects->element[i]->str);
-
-      ignore = redisCommand(context, "KEYS %s:repsheet:*", address);
+      ignore = redisCommand(context, "KEYS %s:repsheet:*", strip_address(suspects->element[i]->str));
       if (ignore && (ignore->type == REDIS_REPLY_ARRAY) && (ignore->elements > 0)) {
         freeReplyObject(ignore);
         continue;
@@ -43,11 +40,10 @@ void score(redisContext *context)
           total += atoi(scores->element[j]->str);
         }
         freeReplyObject(scores);
-        redisCommand(context, "ZINCRBY offenders %d %s", total, address);
+        redisCommand(context, "ZINCRBY offenders %d %s", total, strip_address(suspects->element[i]->str));
         total = 0;
       }
     }
     freeReplyObject(suspects);
-    free(address);
   }
 }

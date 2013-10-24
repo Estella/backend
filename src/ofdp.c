@@ -63,7 +63,6 @@ callback_buffer ofdp_lookup(char *address)
 void ofdp_lookup_offenders(redisContext *context, config_t config)
 {
   int i, wafsec_score;
-  char *address = malloc(16);
   redisReply *offenders, *score, *noop, *ttl;
 
   offenders = redisCommand(context, "ZRANGEBYSCORE offenders 0 +inf");
