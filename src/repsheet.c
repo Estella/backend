@@ -45,15 +45,16 @@ redisContext *get_redis_context()
 static void print_usage()
 {
   printf("Repsheet Backend Version %s\n", VERSION);
-  printf("usage: repsheet [-h] [-p] [-t] [-sbruo]\n \
- -h <redis host>\n \
- -p <redis port>\n \
- -t <blacklist threshold>\n \
- -s (score actors)\n \
- -r (report top 10 offenders)\n \
- -b (blacklist offenders)\n \
- -u (publish blacklist upstream to Cloudflare)\n \
- -o <ofdp score threshold> (score/blacklist actors against wafsec.com)\n");
+  printf("usage: repsheet [-h] [-p] [-t] [-o] [-sbru]\n \
+ --host                   -h <redis host>\n \
+ --port                   -p <redis port>\n \
+ --modsecurity_threshold  -t <blacklist threshold>\n \
+ --ofdp_threshold         -o <ofdp threshold> score and blacklist actors against wafsec.com\n \
+ --score                  -s score actors\n \
+ --report                 -r report top 10 offenders\n \
+ --blacklist              -b blacklist ModSecurity offenders \n \
+ --upstream               -u publish blacklist upstream to Cloudflare\n \
+ --version                -v print version and help\n");
 }
 
 int main(int argc, char *argv[])
@@ -73,7 +74,20 @@ int main(int argc, char *argv[])
   config.ofdp = 0;
   config.ofdp_threshold = 5;
 
-  while((c = getopt (argc, argv, "h:p:t:srbvuo:")) != -1)
+  static struct option long_options[] = {
+    {"host",                  required_argument, NULL, 'h'},
+    {"port",                  required_argument, NULL, 'p'},
+    {"modsecurity_threshold", required_argument, NULL, 't'},
+    {"ofdp_threshold",        required_argument, NULL, 'o'},
+    {"score",                 no_argument,       NULL, 's'},
+    {"report",                no_argument,       NULL, 'r'},
+    {"blacklist",             no_argument,       NULL, 'b'},
+    {"upstream",              no_argument,       NULL, 'u'},
+    {"version",               no_argument,       NULL, 'v'},
+    {0,                       0,                 0,     0}
+  };
+
+  while((c = getopt_long(argc, argv, "h:p:t:o:srbvu", long_options, NULL)) != -1)
     switch(c)
       {
       case 'h':
