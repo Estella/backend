@@ -51,3 +51,4 @@ test/*.log
 test/test_runner
 test/test_runner.trs
 src/.dirstamp
+dump.rdb
