@@ -1,20 +1,26 @@
+repsheet-backend (1.3.0-1) unstable-security; urgency=low
+
+  * Fix OFDP Blacklisting. Introduce long CLI options.
+
+ -- Aaron Bedra <aaron.bedra@braintreepayments.com>  Mon, 28 Oct 2013 09:57:29 -0500
+
 repsheet-backend (1.2.0-1) unstable-security; urgency=low
 
   * Move OFDP to JSON API. OFDP related fixes.
 
- -- Aaron Bedra <abedra@debian>  Thu, 17 Oct 2013 13:45:00 -0500
+ -- Aaron Bedra <aaron@aaronbedra.com>  Thu, 17 Oct 2013 13:45:00 -0500
 
 repsheet-backend (1.1.0-1) unstable-security; urgency=low
 
   * Adds OFDP integration
 
- -- Aaron Bedra <abedra@debian>  Wed, 09 Oct 2013 14:30:53 -0500
+ -- Aaron Bedra <aaron@aaronbedra.com>  Wed, 09 Oct 2013 14:30:53 -0500
 
 repsheet-backend (1.0.0-1) unstable-security; urgency=low
 
   * Sets TTL according to active TTL if possible
 
- -- Aaron Bedra <abedra@debian>  Wed, 21 Aug 2013 16:38:27 -0500
+ -- Aaron Bedra <aaron@aaronbedra.com>  Wed, 21 Aug 2013 16:38:27 -0500
 
 repsheet-backend (0.12-1) unstable-security; urgency=low
 
