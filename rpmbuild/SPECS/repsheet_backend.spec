@@ -1,6 +1,6 @@
 Summary: The backend for Repsheet
 Name: repsheet_backend
-Version: 1.2.0
+Version: 1.3.0
 Release: 1
 License: ASL 2.0
 Group: System Environment/Daemons
@@ -35,6 +35,8 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/repsheet
 
 %changelog
+* Mon Oct 28 2013 Aaron Bedra <aaron.bedra@braintreepayments.com> - 1.3.0-1
+- Fixes OFDP Blacklisting. Adds long CLI options.
 * Fri Oct 18 2013 Aaron Bedra <aaron.bedra@braintreepayments.com> - 1.2.0-1
 - Moves OFDP to JSON API. Minor fixes.
 * Wed Oct 09 2013 Aaron Bedra <aaron.bedra@braintreepayments.com> - 1.1.0-1
