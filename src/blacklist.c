@@ -17,38 +17,65 @@
 #include "util.h"
 #include "blacklist.h"
 
+static int no_action_required(redisContext *context, char *actor)
+{
+  redisReply *noop;
+
+  noop = redisCommand(context, "KEYS %s:repsheet:*", actor);
+  if (noop && noop->elements > 0) {
+    freeReplyObject(noop);
+    return 1;
+  }
+
+  return 0;
+}
+
+static int threshold_exceeded(redisContext *context, int threshold, char *actor)
+{
+  redisReply *score;
+
+  score = redisCommand(context, "ZSCORE offenders %s", actor);
+  if (score && atoi(score->str) > threshold) {
+    freeReplyObject(score);
+    return 1;
+  }
+
+  return 0;
+}
+
+static void blacklist_and_expire(redisContext *context, int expiry, char *actor, char *message)
+{
+  redisReply *ttl;
+
+  redisCommand(context, "SET %s:repsheet:blacklist true", actor);
+
+  ttl = redisCommand(context, "TTL %s:requests", actor);
+  if (ttl && ttl->integer > 0) {
+    redisCommand(context, "EXPIRE %s:repsheet:blacklist %d", actor, ttl->integer);
+    freeReplyObject(ttl);
+  } else {
+    redisCommand(context, "EXPIRE %s:repsheet:blacklist %d", actor, expiry);
+  }
+
+  printf("Actor %s has been blacklisted: %s\n", actor, message);
+}
+
 void blacklist(redisContext *context, config_t config)
 {
   int i;
   int printed = 0;
-  redisReply *offenders, *whitelist, *ttl;
+  redisReply *offenders;
 
-  offenders = redisCommand(context, "ZRANGEBYSCORE offenders %d +inf", config.threshold);
+  offenders = redisCommand(context, "ZRANGE offenders 0 -1");
   if (offenders && (offenders->type == REDIS_REPLY_ARRAY)) {
     for(i = 0; i < offenders->elements; i++) {
-
-      whitelist = redisCommand(context, "GET %s:repsheet:whitelist", offenders->element[i]->str);
-      if (whitelist && whitelist->type == REDIS_REPLY_STRING && strcmp(whitelist->str, "true") == 0) {
-        freeReplyObject(whitelist);
+      if (no_action_required(context, offenders->element[i]->str)) {
         continue;
       }
 
-      if (!printed) {
-        printf("Blacklisting the following repeat offenders (threshold == %d)\n", config.threshold);
-        printed = 1;
+      if (threshold_exceeded(context, config.threshold, offenders->element[i]->str)) {
+        blacklist_and_expire(context, config.expiry, offenders->element[i]->str, THRESHOLD_MESSAGE);
       }
-
-      redisCommand(context, "SET %s:repsheet:blacklist true", offenders->element[i]->str);
-
-      ttl = redisCommand(context, "TTL %s:requests", offenders->element[i]->str);
-      if (ttl && ttl->integer > 0) {
-        redisCommand(context, "EXPIRE %s:repsheet:blacklist %d", offenders->element[i]->str, ttl->integer);
-        freeReplyObject(ttl);
-      } else {
-        redisCommand(context, "EXPIRE %s:repsheet:blacklist %d", offenders->element[i]->str, config.expiry);
-      }
-
-      printf("  %s\n", offenders->element[i]->str);
     }
     freeReplyObject(offenders);
   }

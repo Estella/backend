@@ -19,6 +19,8 @@
 
 #include "repsheet.h"
 
+#define THRESHOLD_MESSAGE "The actor has crossed the ModSecurity blacklist threshold"
+
 void blacklist(redisContext *context, config_t config);
 
 #endif
