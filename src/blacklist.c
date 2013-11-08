@@ -30,19 +30,6 @@ static int no_action_required(redisContext *context, char *actor)
   return 0;
 }
 
-static int threshold_exceeded(redisContext *context, int threshold, char *actor)
-{
-  redisReply *score;
-
-  score = redisCommand(context, "ZSCORE offenders %s", actor);
-  if (score && atoi(score->str) > threshold) {
-    freeReplyObject(score);
-    return 1;
-  }
-
-  return 0;
-}
-
 static int historical_offender(redisContext *context, char *actor)
 {
   redisReply *reply;
@@ -83,16 +70,16 @@ void blacklist(redisContext *context, config_t config)
   int printed = 0;
   redisReply *offenders;
 
-  offenders = redisCommand(context, "ZRANGE offenders 0 -1");
+  offenders = redisCommand(context, "ZRANGE offenders 0 -1 WITHSCORES");
   if (offenders && (offenders->type == REDIS_REPLY_ARRAY)) {
-    for(i = 0; i < offenders->elements; i++) {
+    for(i = 0; i < offenders->elements; i += 2) {
       if (no_action_required(context, offenders->element[i]->str)) {
         continue;
       }
 
       if(historical_offender(context, offenders->element[i]->str)) {
 	blacklist_and_expire(context, config.expiry, offenders->element[i]->str, HISTORY_MESSAGE);
-      } else if (threshold_exceeded(context, config.threshold, offenders->element[i]->str)) {
+      } else if (atoi(offenders->element[i+1]->str) > config.threshold) {
         blacklist_and_expire(context, config.expiry, offenders->element[i]->str, THRESHOLD_MESSAGE);
       }
     }
