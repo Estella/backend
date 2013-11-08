@@ -20,6 +20,7 @@
 #include "repsheet.h"
 
 #define THRESHOLD_MESSAGE "The actor has crossed the ModSecurity blacklist threshold"
+#define HISTORY_MESSAGE "The actor is a return offender"
 
 void blacklist(redisContext *context, config_t config);
 

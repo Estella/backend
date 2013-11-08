@@ -43,11 +43,28 @@ static int threshold_exceeded(redisContext *context, int threshold, char *actor)
   return 0;
 }
 
+static int historical_offender(redisContext *context, char *actor)
+{
+  redisReply *reply;
+
+  reply = redisCommand(context, "SISMEMBER repsheet:blacklist:history %s", actor);
+  if (reply) {
+    if (reply->integer == 1) {
+      freeReplyObject(reply);
+      return 1;
+    }
+    freeReplyObject(reply);
+  }
+
+  return 0;
+}
+
 static void blacklist_and_expire(redisContext *context, int expiry, char *actor, char *message)
 {
   redisReply *ttl;
 
   redisCommand(context, "SET %s:repsheet:blacklist true", actor);
+  redisCommand(context, "SADD repsheet:blacklist:history %s", actor);
 
   ttl = redisCommand(context, "TTL %s:requests", actor);
   if (ttl && ttl->integer > 0) {
@@ -73,7 +90,9 @@ void blacklist(redisContext *context, config_t config)
         continue;
       }
 
-      if (threshold_exceeded(context, config.threshold, offenders->element[i]->str)) {
+      if(historical_offender(context, offenders->element[i]->str)) {
+	blacklist_and_expire(context, config.expiry, offenders->element[i]->str, HISTORY_MESSAGE);
+      } else if (threshold_exceeded(context, config.threshold, offenders->element[i]->str)) {
         blacklist_and_expire(context, config.expiry, offenders->element[i]->str, THRESHOLD_MESSAGE);
       }
     }
