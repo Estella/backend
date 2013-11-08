@@ -94,20 +94,20 @@ int main(int argc, char *argv[])
         config.host = optarg;
         break;
       case 'p':
-	redis_port = process_command_line_argument(optarg);
-	if (redis_port != INVALID_ARGUMENT_ERROR) {
-	  config.port = redis_port;
-	} else {
-	  printf("Redis port must be between 1 and %d, defaulting to %d\n", USHRT_MAX, config.port);
-	}
+        redis_port = process_command_line_argument(optarg);
+        if (redis_port != INVALID_ARGUMENT_ERROR) {
+          config.port = redis_port;
+        } else {
+          printf("Redis port must be between 1 and %d, defaulting to %d\n", USHRT_MAX, config.port);
+        }
         break;
       case 't':
-	blacklist_threshold = process_command_line_argument(optarg);
-	if (blacklist_threshold != INVALID_ARGUMENT_ERROR) {
-	  config.threshold = blacklist_threshold;
-	} else {
-	  printf("ModSecurity threshold must be between 1 and %d, defaulting to %d\n", USHRT_MAX, config.threshold);
-	}
+        blacklist_threshold = process_command_line_argument(optarg);
+        if (blacklist_threshold != INVALID_ARGUMENT_ERROR) {
+          config.threshold = blacklist_threshold;
+        } else {
+          printf("ModSecurity threshold must be between 1 and %d, defaulting to %d\n", USHRT_MAX, config.threshold);
+        }
         break;
       case 's':
         config.score = 1;
@@ -122,14 +122,14 @@ int main(int argc, char *argv[])
         config.upstream = 1;
         break;
       case 'o':
-	config.ofdp = 1;
-	ofdp_threshold = process_command_line_argument(optarg);
-	if (ofdp_threshold != INVALID_ARGUMENT_ERROR) {
-	  config.ofdp_threshold = ofdp_threshold;
-	} else {
-	  printf("OFDP threshold must be between 1 and %d, defaulting to %d\n", USHRT_MAX, config.ofdp_threshold);
-	}
-	break;
+        config.ofdp = 1;
+        ofdp_threshold = process_command_line_argument(optarg);
+        if (ofdp_threshold != INVALID_ARGUMENT_ERROR) {
+          config.ofdp_threshold = ofdp_threshold;
+        } else {
+          printf("OFDP threshold must be between 1 and %d, defaulting to %d\n", USHRT_MAX, config.ofdp_threshold);
+        }
+        break;
       case 'v':
         print_usage();
         return 0;

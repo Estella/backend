@@ -84,17 +84,7 @@ void ofdp_lookup_offenders(redisContext *context, config_t config)
       redisCommand(context, "SET %s:score %d", offenders->element[i]->str, wafsec_score);
 
       if (wafsec_score > config.ofdp_threshold) {
-
-        redisCommand(context, "SET %s:repsheet:blacklist true", offenders->element[i]->str);
-        printf("Actor %s has been blacklisted due to high OFDP risk (Score: %d)\n", offenders->element[i]->str, wafsec_score);
-
-        ttl = redisCommand(context, "TTL %s:requests", offenders->element[i]->str);
-        if (ttl && ttl->integer > 0) {
-          redisCommand(context, "EXPIRE %s:repsheet:blacklist %d", offenders->element[i]->str, ttl->integer);
-          freeReplyObject(ttl);
-        } else {
-          redisCommand(context, "EXPIRE %s:repsheet:blacklist %d", offenders->element[i]->str, config.expiry);
-        }
+        blacklist_and_expire(context, config.expiry, offenders->element[i]->str, OFDP_MESSAGE);
       }
     }
     freeReplyObject(offenders);

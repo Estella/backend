@@ -106,13 +106,38 @@ END_TEST
 
 START_TEST(expires_blacklist_keys)
 {
-  redisCommand(context, "ZINCRBY 1.1.1.1:detected 10 950001");
+  redisCommand(context, "ZINCRBY 1.1.1.5:detected 10 950001");
 
   score(context);
   blacklist(context, config);
 
-  reply = redisCommand(context, "TTL 1.1.1.1:repsheet:blacklist");
+  reply = redisCommand(context, "TTL 1.1.1.5:repsheet:blacklist");
   ck_assert(reply->integer > 86300);
+}
+END_TEST
+
+START_TEST(keeps_a_record_of_blacklisted_actors)
+{
+  redisCommand(context, "ZINCRBY 1.1.1.6:detected 10 950001");
+
+  score(context);
+  blacklist(context, config);
+
+  reply = redisCommand(context, "SISMEMBER repsheet:blacklist:history 1.1.1.6");
+  ck_assert_int_eq(reply->integer, 1);
+}
+END_TEST
+
+START_TEST(blacklists_historical_repeat_offenders)
+{
+  redisCommand(context, "SADD repsheet:blacklist:history 1.1.1.7");
+  redisCommand(context, "ZINCRBY 1.1.1.7:detected 1 950001");
+
+  score(context);
+  blacklist(context, config);
+
+  reply = redisCommand(context, "EXISTS 1.1.1.7:repsheet:blacklist");
+  ck_assert_int_eq(reply->integer, 1);
 }
 END_TEST
 
@@ -124,8 +149,10 @@ Suite *make_blacklist_suite(void) {
   tcase_add_test(tc_blacklist, does_nothing_if_there_are_no_offenders);
   tcase_add_test(tc_blacklist, does_not_delete_offenders_key);
   tcase_add_test(tc_blacklist, does_not_blacklist_whitelisted_actors);
-  tcase_add_test(tc_blacklist, expires_blacklist_keys);
   tcase_add_test(tc_blacklist, can_blacklist_multiple_offenders_at_once);
+  tcase_add_test(tc_blacklist, expires_blacklist_keys);
+  tcase_add_test(tc_blacklist, keeps_a_record_of_blacklisted_actors);
+  tcase_add_test(tc_blacklist, blacklists_historical_repeat_offenders);
   suite_add_tcase(suite, tc_blacklist);
 
   return suite;

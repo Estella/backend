@@ -14,8 +14,7 @@
   limitations under the License.
 */
 
-#include <stdlib.h>
-#include <string.h>
+#include "util.h"
 
 char *strip_address(char *key)
 {
@@ -31,4 +30,22 @@ char *strip_address(char *key)
   address[position] = '\0';
 
   return address;
+}
+
+void blacklist_and_expire(redisContext *context, int expiry, char *actor, char *message)
+{
+  redisReply *ttl;
+
+  redisCommand(context, "SET %s:repsheet:blacklist true", actor);
+  redisCommand(context, "SADD repsheet:blacklist:history %s", actor);
+
+  ttl = redisCommand(context, "TTL %s:requests", actor);
+  if (ttl && ttl->integer > 0) {
+    redisCommand(context, "EXPIRE %s:repsheet:blacklist %d", actor, ttl->integer);
+    freeReplyObject(ttl);
+  } else {
+    redisCommand(context, "EXPIRE %s:repsheet:blacklist %d", actor, expiry);
+  }
+
+  printf("Actor %s has been blacklisted: %s\n", actor, message);
 }
