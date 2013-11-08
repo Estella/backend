@@ -17,7 +17,12 @@
 #ifndef __UTIL_H
 #define __UTIL_H
 
-#include <stdlib.h>
+#include "repsheet.h"
+
+
+#define THRESHOLD_MESSAGE "The actor has exceeded the ModSecurity blacklist threshold"
+#define HISTORY_MESSAGE "The actor is a return offender"
+#define OFDP_MESSAGE "The actor has exceeded the OFDP risk threshold"
 
 typedef struct callback_buffer
 {
@@ -26,5 +31,6 @@ typedef struct callback_buffer
 } callback_buffer;
 
 char *strip_address(char *key);
+void blacklist_and_expire(redisContext *context, int expiry, char *actor, char *message);
 
 #endif

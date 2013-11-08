@@ -46,24 +46,6 @@ static int historical_offender(redisContext *context, char *actor)
   return 0;
 }
 
-static void blacklist_and_expire(redisContext *context, int expiry, char *actor, char *message)
-{
-  redisReply *ttl;
-
-  redisCommand(context, "SET %s:repsheet:blacklist true", actor);
-  redisCommand(context, "SADD repsheet:blacklist:history %s", actor);
-
-  ttl = redisCommand(context, "TTL %s:requests", actor);
-  if (ttl && ttl->integer > 0) {
-    redisCommand(context, "EXPIRE %s:repsheet:blacklist %d", actor, ttl->integer);
-    freeReplyObject(ttl);
-  } else {
-    redisCommand(context, "EXPIRE %s:repsheet:blacklist %d", actor, expiry);
-  }
-
-  printf("Actor %s has been blacklisted: %s\n", actor, message);
-}
-
 void blacklist(redisContext *context, config_t config)
 {
   int i;
@@ -78,7 +60,7 @@ void blacklist(redisContext *context, config_t config)
       }
 
       if(historical_offender(context, offenders->element[i]->str)) {
-	blacklist_and_expire(context, config.expiry, offenders->element[i]->str, HISTORY_MESSAGE);
+        blacklist_and_expire(context, config.expiry, offenders->element[i]->str, HISTORY_MESSAGE);
       } else if (atoi(offenders->element[i+1]->str) > config.threshold) {
         blacklist_and_expire(context, config.expiry, offenders->element[i]->str, THRESHOLD_MESSAGE);
       }
