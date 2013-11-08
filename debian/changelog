@@ -1,3 +1,9 @@
+repsheet-backend (1.4.0-1) unstable-security; urgency=low
+
+  * Adds historical blacklisting.
+
+ -- Aaron Bedra <aaron@aaronbedra.com>  Fri, 08 Nov 2013 15:17:58 -0600
+
 repsheet-backend (1.3.0-1) unstable-security; urgency=low
 
   * Fix OFDP Blacklisting. Introduce long CLI options.
