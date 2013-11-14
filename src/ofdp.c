@@ -2,11 +2,23 @@
 
 int ofdp_score(callback_buffer response)
 {
-  struct json_object *json;
+  struct json_object *json, *score_obj;
   long score;
 
   json = json_tokener_parse(response.buffer);
-  score = strtol(json_object_get_string(json_object_object_get(json, "score")), 0, 10);
+
+  if (is_error(json)) {
+    printf("Error parsing JSON response. The server responded with:\n\n%s\n\n", response.buffer);
+    return 0;
+  }
+
+  score_obj = json_object_object_get(json, "score");
+  if (!score_obj) {
+    printf("Could not locate score in response. The server responded with:\n\n%s\n\n", response.buffer);
+    return 0;
+  }
+
+  score = strtol(json_object_get_string(score_obj), 0, 10);
 
   if (errno == ERANGE || score <= 0 || score > USHRT_MAX) {
     return 0;
