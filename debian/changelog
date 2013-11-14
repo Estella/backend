@@ -1,3 +1,9 @@
+repsheet-backend (1.5.0-1) unstable-security; urgency=low
+
+  * Fixes a segfault issue with OFDP scoring
+
+ -- Aaron Bedra <aaron@aaronbedra.com>  Thu, 14 Nov 2013 08:25:23 -0600
+
 repsheet-backend (1.4.0-1) unstable-security; urgency=low
 
   * Adds historical blacklisting.
