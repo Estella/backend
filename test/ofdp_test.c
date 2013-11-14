@@ -25,12 +25,30 @@ START_TEST(properly_finds_the_score_in_the_response)
 }
 END_TEST
 
+START_TEST(handles_non_json_response)
+{
+  data.buffer = "bad response";
+  data.size = strlen(data.buffer) + 1;
+  int score = ofdp_score(data);
+}
+END_TEST
+
+START_TEST(handles_no_score_in_json_response)
+{
+  data.buffer = "{\"foo\":\"bar\"}";
+  data.size = strlen(data.buffer) + 1;
+  int score = ofdp_score(data);
+}
+END_TEST
+
 Suite *make_ofdp_suite(void) {
   Suite *suite = suite_create("ofdp");
 
   TCase *tc_ofdp = tcase_create("units");
   tcase_add_checked_fixture(tc_ofdp, ofdp_setup, ofdp_teardown);
   tcase_add_test(tc_ofdp, properly_finds_the_score_in_the_response);
+  tcase_add_test(tc_ofdp, handles_non_json_response);
+  tcase_add_test(tc_ofdp, handles_no_score_in_json_response);
   suite_add_tcase(suite, tc_ofdp);
 
   return suite;
