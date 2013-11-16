@@ -17,19 +17,6 @@
 #include "util.h"
 #include "blacklist.h"
 
-static int no_action_required(redisContext *context, char *actor)
-{
-  redisReply *noop;
-
-  noop = redisCommand(context, "KEYS %s:repsheet:*", actor);
-  if (noop && noop->elements > 0) {
-    freeReplyObject(noop);
-    return 1;
-  }
-
-  return 0;
-}
-
 static int historical_offender(redisContext *context, char *actor)
 {
   redisReply *reply;
@@ -46,9 +33,9 @@ static int historical_offender(redisContext *context, char *actor)
   return 0;
 }
 
-void blacklist(redisContext *context, config_t config)
+void analyze_offenders(redisContext *context, config_t config)
 {
-  int i;
+  int i, score;
   int printed = 0;
   redisReply *offenders;
 
@@ -60,9 +47,13 @@ void blacklist(redisContext *context, config_t config)
       }
 
       if(historical_offender(context, offenders->element[i]->str)) {
-        blacklist_and_expire(context, config.expiry, offenders->element[i]->str, HISTORY_MESSAGE);
-      } else if (atoi(offenders->element[i+1]->str) > config.threshold) {
-        blacklist_and_expire(context, config.expiry, offenders->element[i]->str, THRESHOLD_MESSAGE);
+        blacklist_and_expire(context, config.expiry, offenders->element[i]->str, HISTORY_MESSAGE, (int)NULL);
+	continue;
+      }
+
+      score = strtol(offenders->element[i+1]->str, 0, 10);
+      if (score >= config.threshold) {
+        blacklist_and_expire(context, config.expiry, offenders->element[i]->str, THRESHOLD_MESSAGE, score);
       }
     }
     freeReplyObject(offenders);

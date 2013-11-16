@@ -14,7 +14,7 @@ void blacklist_setup(void)
     ck_abort_msg("Could not connect to Redis");
   }
 
-  config.threshold = 1;
+  config.threshold = 10;
   config.expiry = (24 * 60 * 60);
 }
 
@@ -32,7 +32,7 @@ void blacklist_teardown(void)
 START_TEST(does_nothing_if_there_are_no_offenders)
 {
   score(context);
-  blacklist(context, config);
+  analyze_offenders(context, config);
 
   reply = redisCommand(context, "KEYS *:repsheet:blacklist");
   ck_assert_int_eq(reply->elements, 0);
@@ -44,7 +44,7 @@ START_TEST(does_not_delete_offenders_key)
   redisCommand(context, "ZINCRBY 1.1.1.1:detected 10 950001");
 
   score(context);
-  blacklist(context, config);
+  analyze_offenders(context, config);
 
   reply = redisCommand(context, "EXISTS offenders");
   ck_assert_int_eq(reply->integer, 1);
@@ -58,7 +58,7 @@ START_TEST(does_not_blacklist_whitelisted_actors)
   redisCommand(context, "SET 1.1.1.1:repsheet:whitelist true");
 
   score(context);
-  blacklist(context, config);
+  analyze_offenders(context, config);
 
   reply = redisCommand(context, "GET 1.1.1.2:repsheet:blacklist");
   ck_assert_int_eq(reply->type, REDIS_REPLY_STRING);
@@ -86,9 +86,11 @@ START_TEST(can_blacklist_multiple_offenders_at_once)
   redisCommand(context, "ZINCRBY 1.1.1.2:detected 10 950001");
   redisCommand(context, "ZINCRBY 1.1.1.3:detected 10 950001");
   redisCommand(context, "ZINCRBY 1.1.1.4:detected 10 950001");
+  redisCommand(context, "ZINCRBY 1.1.1.5:detected 5 950001");
+  redisCommand(context, "ZINCRBY 1.1.1.6:detected 7 950001");
 
   score(context);
-  blacklist(context, config);
+  analyze_offenders(context, config);
 
   reply = redisCommand(context, "EXISTS 1.1.1.1:repsheet:blacklist");
   ck_assert_int_eq(reply->integer, 1);
@@ -101,6 +103,12 @@ START_TEST(can_blacklist_multiple_offenders_at_once)
 
   reply = redisCommand(context, "EXISTS 1.1.1.4:repsheet:blacklist");
   ck_assert_int_eq(reply->integer, 1);
+
+  reply = redisCommand(context, "EXISTS 1.1.1.5:repsheet:blacklist");
+  ck_assert_int_eq(reply->integer, 0);
+
+  reply = redisCommand(context, "EXISTS 1.1.1.6:repsheet:blacklist");
+  ck_assert_int_eq(reply->integer, 0);
 }
 END_TEST
 
@@ -109,7 +117,7 @@ START_TEST(expires_blacklist_keys)
   redisCommand(context, "ZINCRBY 1.1.1.5:detected 10 950001");
 
   score(context);
-  blacklist(context, config);
+  analyze_offenders(context, config);
 
   reply = redisCommand(context, "TTL 1.1.1.5:repsheet:blacklist");
   ck_assert(reply->integer > 86300);
@@ -121,7 +129,7 @@ START_TEST(keeps_a_record_of_blacklisted_actors)
   redisCommand(context, "ZINCRBY 1.1.1.6:detected 10 950001");
 
   score(context);
-  blacklist(context, config);
+  analyze_offenders(context, config);
 
   reply = redisCommand(context, "SISMEMBER repsheet:blacklist:history 1.1.1.6");
   ck_assert_int_eq(reply->integer, 1);
@@ -134,7 +142,7 @@ START_TEST(blacklists_historical_repeat_offenders)
   redisCommand(context, "ZINCRBY 1.1.1.7:detected 1 950001");
 
   score(context);
-  blacklist(context, config);
+  analyze_offenders(context, config);
 
   reply = redisCommand(context, "EXISTS 1.1.1.7:repsheet:blacklist");
   ck_assert_int_eq(reply->integer, 1);

@@ -31,6 +31,9 @@ typedef struct callback_buffer
 } callback_buffer;
 
 char *strip_address(char *key);
-void blacklist_and_expire(redisContext *context, int expiry, char *actor, char *message);
+int no_action_required(redisContext *context, char *actor);
+void expire(redisContext *context, char *actor, char *suffix, int expiry);
+void blacklist(redisContext *context, char *actor);
+void blacklist_and_expire(redisContext *context, int expiry, char *actor, char *message, int score);
 
 #endif

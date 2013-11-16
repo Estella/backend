@@ -19,6 +19,6 @@
 
 #include "repsheet.h"
 
-void blacklist(redisContext *context, config_t config);
+void analyze_offenders(redisContext *context, config_t config);
 
 #endif

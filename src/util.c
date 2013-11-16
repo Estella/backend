@@ -32,20 +32,46 @@ char *strip_address(char *key)
   return address;
 }
 
-void blacklist_and_expire(redisContext *context, int expiry, char *actor, char *message)
+int no_action_required(redisContext *context, char *actor)
+{
+  redisReply *noop;
+
+  noop = redisCommand(context, "KEYS %s:repsheet:*", actor);
+  if (noop && noop->elements > 0) {
+    freeReplyObject(noop);
+    return 1;
+  }
+
+  return 0;
+}
+
+void expire(redisContext *context, char *actor, char *suffix, int expiry)
 {
   redisReply *ttl;
 
-  redisCommand(context, "SET %s:repsheet:blacklist true", actor);
-  redisCommand(context, "SADD repsheet:blacklist:history %s", actor);
-
   ttl = redisCommand(context, "TTL %s:requests", actor);
   if (ttl && ttl->integer > 0) {
-    redisCommand(context, "EXPIRE %s:repsheet:blacklist %d", actor, ttl->integer);
+    redisCommand(context, "EXPIRE %s:%s %d", actor, suffix, ttl->integer);
     freeReplyObject(ttl);
   } else {
-    redisCommand(context, "EXPIRE %s:repsheet:blacklist %d", actor, expiry);
+    redisCommand(context, "EXPIRE %s:%s %d", actor, suffix, expiry);
   }
+}
 
-  printf("Actor %s has been blacklisted: %s\n", actor, message);
+void blacklist(redisContext *context, char *actor)
+{
+  redisCommand(context, "SET %s:repsheet:blacklist true", actor);
+  redisCommand(context, "SADD repsheet:blacklist:history %s", actor);
+}
+
+void blacklist_and_expire(redisContext *context, int expiry, char *actor, char *message, int score)
+{
+  blacklist(context, actor);
+  expire(context, actor, "repsheet:blacklist", expiry);
+
+  if (score) {
+    printf("Actor %s has been blacklisted: %s. [Score: %d]\n", actor, message, score);
+  } else {
+    printf("Actor %s has been blacklisted: %s\n", actor, message);
+  }
 }

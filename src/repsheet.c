@@ -157,7 +157,7 @@ int main(int argc, char *argv[])
 
   if (config.blacklist) {
     score(context);
-    blacklist(context, config);
+    analyze_offenders(context, config);
     score(context);
   }
 
