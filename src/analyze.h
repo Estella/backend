@@ -14,11 +14,7 @@
   limitations under the License.
 */
 
-#ifndef __BLACKLIST_H
-#define __BLACKLIST_H
-
 #include "repsheet.h"
+#include "ofdp.h"
 
-void analyze_offenders(redisContext *context, config_t config);
-
-#endif
+void analyze(redisContext *context, config_t config);

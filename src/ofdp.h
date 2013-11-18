@@ -22,6 +22,7 @@
 #define OFDP_URL "http://wafsec.com/api?lean=true&ip="
 
 int ofdp_score(callback_buffer response);
-void ofdp_lookup_offenders(redisContext *context, config_t config);
+int lookup_and_store_ofdp_score(redisContext *context, char *actor, int expiry);
+int previously_scored(redisContext *context, char *actor);
 
 #endif

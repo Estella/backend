@@ -14,48 +14,41 @@
   limitations under the License.
 */
 
-#include "util.h"
-#include "blacklist.h"
+#include "analyze.h"
 
-static int historical_offender(redisContext *context, char *actor)
+void analyze(redisContext *context, config_t config)
 {
-  redisReply *reply;
+  score(context);
 
-  reply = redisCommand(context, "SISMEMBER repsheet:blacklist:history %s", actor);
-  if (reply) {
-    if (reply->integer == 1) {
-      freeReplyObject(reply);
-      return 1;
-    }
-    freeReplyObject(reply);
-  }
-
-  return 0;
-}
-
-void analyze_offenders(redisContext *context, config_t config)
-{
-  int i, score;
+  int i, modsecurity_score, ofdp_score;
   int printed = 0;
   redisReply *offenders;
 
   offenders = redisCommand(context, "ZRANGE offenders 0 -1 WITHSCORES");
   if (offenders && (offenders->type == REDIS_REPLY_ARRAY)) {
     for(i = 0; i < offenders->elements; i += 2) {
-      if (no_action_required(context, offenders->element[i]->str)) {
+      if (no_action_required(context, offenders->element[i]->str) || previously_scored(context, offenders->element[i]->str)) {
         continue;
       }
 
       if(historical_offender(context, offenders->element[i]->str)) {
         blacklist_and_expire(context, config.expiry, offenders->element[i]->str, HISTORY_MESSAGE, (int)NULL);
+        continue;
+      }
+
+      modsecurity_score = strtol(offenders->element[i+1]->str, 0, 10);
+      if (modsecurity_score >= config.modsecurity_threshold) {
+        blacklist_and_expire(context, config.expiry, offenders->element[i]->str, THRESHOLD_MESSAGE, modsecurity_score);
 	continue;
       }
 
-      score = strtol(offenders->element[i+1]->str, 0, 10);
-      if (score >= config.modsecurity_threshold) {
-        blacklist_and_expire(context, config.expiry, offenders->element[i]->str, THRESHOLD_MESSAGE, score);
+      ofdp_score = lookup_and_store_ofdp_score(context, offenders->element[i]->str, config.expiry);
+      if (ofdp_score > config.ofdp_threshold) {
+        blacklist_and_expire(context, config.expiry, offenders->element[i]->str, OFDP_MESSAGE, ofdp_score);
       }
     }
     freeReplyObject(offenders);
   }
+
+  score(context);
 }

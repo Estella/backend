@@ -45,6 +45,22 @@ int no_action_required(redisContext *context, char *actor)
   return 0;
 }
 
+int historical_offender(redisContext *context, char *actor)
+{
+  redisReply *reply;
+
+  reply = redisCommand(context, "SISMEMBER repsheet:blacklist:history %s", actor);
+  if (reply) {
+    if (reply->integer == 1) {
+      freeReplyObject(reply);
+      return 1;
+    }
+    freeReplyObject(reply);
+  }
+
+  return 0;
+}
+
 void expire(redisContext *context, char *actor, char *suffix, int expiry)
 {
   redisReply *ttl;

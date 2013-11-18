@@ -17,9 +17,8 @@
 #include "repsheet.h"
 #include "score.h"
 #include "report.h"
-#include "blacklist.h"
+#include "analyze.h"
 #include "upstream.h"
-#include "ofdp.h"
 #include "cli.h"
 
 config_t config;
@@ -49,14 +48,12 @@ static void print_usage()
  --score                  -s score actors\n \
  --report                 -r report top 10 offenders\n \
  --analyze                -a analyze and act on offenders\n \
- --publish                -p publish blacklist to upstream providers\n \
+ --publish                -u publish blacklist to upstream providers\n \
  --host                   -h <redis host>\n \
  --port                   -p <redis port>\n \
  --expiry                 -e <redis expiry> blacklist expire time\n \
  --modsecurity_threshold  -t <blacklist threshold>\n \
  --ofdp_threshold         -o <ofdp threshold> score and blacklist actors against wafsec.com\n \
- --blacklist              -b blacklist ModSecurity offenders \n \
- --upstream               -u publish blacklist upstream to Cloudflare\n \
  --version                -v print version and help\n");
 }
 
@@ -69,6 +66,7 @@ int main(int argc, char *argv[])
   config.score = 0;
   config.report = 0;
   config.analyze = 0;
+  config.publish = 0;
 
   config.host = "localhost";
   config.port = 6379;
@@ -76,10 +74,6 @@ int main(int argc, char *argv[])
 
   config.ofdp_threshold = 50;
   config.modsecurity_threshold = 200;
-
-  config.blacklist = 0;
-  config.ofdp = 0;
-  config.publish = 0;
 
   static struct option long_options[] = {
     {"score",                 no_argument,       NULL, 's'},
@@ -93,9 +87,6 @@ int main(int argc, char *argv[])
 
     {"modsecurity_threshold", required_argument, NULL, 't'},
     {"ofdp_threshold",        required_argument, NULL, 'o'},
-
-    {"blacklist",             no_argument,       NULL, 'b'},
-    {"upstream",              no_argument,       NULL, 'u'},
 
     {"version",               no_argument,       NULL, 'v'},
     {0,                       0,                 0,     0}
@@ -146,18 +137,12 @@ int main(int argc, char *argv[])
         }
         break;
       case 'o':
-	config.ofdp = 1;
         ofdp_threshold = process_command_line_argument(optarg);
         if (ofdp_threshold != INVALID_ARGUMENT_ERROR) {
           config.ofdp_threshold = ofdp_threshold;
         } else {
           printf("OFDP threshold must be between 1 and %d, defaulting to %d\n", USHRT_MAX, config.ofdp_threshold);
         }
-        break;
-
-      case 'b':
-	DEPRECATED("blacklist", "Please use the analyze option.");
-        config.blacklist = 1;
         break;
 
       case 'v':
@@ -176,8 +161,8 @@ int main(int argc, char *argv[])
     return -1;
   }
 
-  if (!config.score && !config.report && !config.analyze && !config.publish && !config.blacklist && !config.ofdp) {
-    printf("No options specified, performing score operation only!\n");
+  if (!config.score && !config.report && !config.analyze && !config.publish) {
+    printf("No options specified, performing score operation\n");
     score(context);
   }
 
@@ -189,25 +174,12 @@ int main(int argc, char *argv[])
     report(context);
   }
 
+  if (config.analyze) {
+    analyze(context, config);
+  }
+
   if (config.publish) {
     publish_blacklist(context);
-  }
-
-  if (config.analyze) {
-    //TODO: implement
-    // analyze(context, config);
-    printf("Analyze has not been implemented\n");
-  }
-
-  if (config.blacklist) {
-    score(context);
-    analyze_offenders(context, config);
-    score(context);
-  }
-
-  if (config.ofdp) {
-    score(context);
-    ofdp_lookup_offenders(context, config);
   }
 
   redisFree(context);

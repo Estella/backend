@@ -33,7 +33,6 @@
 
 #define VERSION "1.5.0"
 
-#define DEPRECATED(arg, message) printf("The %s argument has been deprecated. %s\n", arg, message);
 #define TWENTYFOUR_HOURS 86400;
 
 typedef struct config_t {

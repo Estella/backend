@@ -72,7 +72,7 @@ static callback_buffer ofdp_lookup(char *address)
   return response;
 }
 
-static int lookup_and_store_ofdp_score(redisContext *context, char *actor, int expiry)
+int lookup_and_store_ofdp_score(redisContext *context, char *actor, int expiry)
 {
   int score;
 
@@ -83,7 +83,7 @@ static int lookup_and_store_ofdp_score(redisContext *context, char *actor, int e
   return score;
 }
 
-static int previously_scored(redisContext *context, char *actor)
+int previously_scored(redisContext *context, char *actor)
 {
   redisReply *score;
 
@@ -94,26 +94,4 @@ static int previously_scored(redisContext *context, char *actor)
   }
 
   return 0;
-}
-
-void ofdp_lookup_offenders(redisContext *context, config_t config)
-{
-  int i, score;
-  redisReply *offenders;
-
-  offenders = redisCommand(context, "ZRANGEBYSCORE offenders 0 +inf");
-  if (offenders && (offenders->type == REDIS_REPLY_ARRAY)) {
-    for (i = 0; i < offenders->elements; i++) {
-      if (no_action_required(context, offenders->element[i]->str) || previously_scored(context, offenders->element[i]->str)) {
-        continue;
-      }
-
-      score = lookup_and_store_ofdp_score(context, offenders->element[i]->str, config.expiry);
-
-      if (score > config.ofdp_threshold) {
-        blacklist_and_expire(context, config.expiry, offenders->element[i]->str, OFDP_MESSAGE, score);
-      }
-    }
-    freeReplyObject(offenders);
-  }
 }
