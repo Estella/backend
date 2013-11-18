@@ -41,6 +41,7 @@ typedef struct config_t {
   int score;
   int report;
   int analyze;
+  int publish;
 
   // redis configuration options
   int port;
@@ -49,7 +50,6 @@ typedef struct config_t {
 
   // analyze options
   int blacklist;
-  int upstream;
   int ofdp;
 
   // thresholds

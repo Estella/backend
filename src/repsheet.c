@@ -49,6 +49,7 @@ static void print_usage()
  --score                  -s score actors\n \
  --report                 -r report top 10 offenders\n \
  --analyze                -a analyze and act on offenders\n \
+ --publish                -p publish blacklist to upstream providers\n \
  --host                   -h <redis host>\n \
  --port                   -p <redis port>\n \
  --expiry                 -e <redis expiry> blacklist expire time\n \
@@ -78,12 +79,13 @@ int main(int argc, char *argv[])
 
   config.blacklist = 0;
   config.ofdp = 0;
-  config.upstream = 0;
+  config.publish = 0;
 
   static struct option long_options[] = {
     {"score",                 no_argument,       NULL, 's'},
     {"report",                no_argument,       NULL, 'r'},
     {"analyze",               no_argument,       NULL, 'a'},
+    {"publish",               no_argument,       NULL, 'u'},
 
     {"host",                  required_argument, NULL, 'h'},
     {"port",                  required_argument, NULL, 'p'},
@@ -99,7 +101,7 @@ int main(int argc, char *argv[])
     {0,                       0,                 0,     0}
   };
 
-  while((c = getopt_long(argc, argv, "h:p:e:t:o:srabuv", long_options, NULL)) != -1)
+  while((c = getopt_long(argc, argv, "h:p:e:t:o:srauv", long_options, NULL)) != -1)
     switch(c)
       {
       case 's':
@@ -110,6 +112,9 @@ int main(int argc, char *argv[])
         break;
       case 'a':
         config.analyze = 1;
+        break;
+      case 'u':
+        config.publish = 1;
         break;
 
       case 'h':
@@ -154,9 +159,6 @@ int main(int argc, char *argv[])
 	DEPRECATED("blacklist", "Please use the analyze option.");
         config.blacklist = 1;
         break;
-      case 'u':
-        config.upstream = 1;
-        break;
 
       case 'v':
         print_usage();
@@ -174,7 +176,7 @@ int main(int argc, char *argv[])
     return -1;
   }
 
-  if (!config.score && !config.report && !config.analyze && !config.upstream) {
+  if (!config.score && !config.report && !config.analyze && !config.publish && !config.blacklist && !config.ofdp) {
     printf("No options specified, performing score operation only!\n");
     score(context);
   }
@@ -185,6 +187,10 @@ int main(int argc, char *argv[])
 
   if (config.report) {
     report(context);
+  }
+
+  if (config.publish) {
+    publish_blacklist(context);
   }
 
   if (config.analyze) {
@@ -202,11 +208,6 @@ int main(int argc, char *argv[])
   if (config.ofdp) {
     score(context);
     ofdp_lookup_offenders(context, config);
-  }
-
-  //TODO: rename to publish
-  if (config.upstream) {
-    publish_blacklist(context);
   }
 
   redisFree(context);
