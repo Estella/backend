@@ -52,7 +52,7 @@ void analyze_offenders(redisContext *context, config_t config)
       }
 
       score = strtol(offenders->element[i+1]->str, 0, 10);
-      if (score >= config.threshold) {
+      if (score >= config.modsecurity_threshold) {
         blacklist_and_expire(context, config.expiry, offenders->element[i]->str, THRESHOLD_MESSAGE, score);
       }
     }

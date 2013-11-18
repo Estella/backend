@@ -19,7 +19,6 @@
 
 #include "repsheet.h"
 
-
 #define THRESHOLD_MESSAGE "The actor has exceeded the ModSecurity blacklist threshold"
 #define HISTORY_MESSAGE "The actor is a return offender"
 #define OFDP_MESSAGE "The actor has exceeded the OFDP risk threshold"

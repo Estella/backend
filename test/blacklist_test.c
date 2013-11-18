@@ -14,7 +14,7 @@ void blacklist_setup(void)
     ck_abort_msg("Could not connect to Redis");
   }
 
-  config.threshold = 10;
+  config.modsecurity_threshold = 10;
   config.expiry = (24 * 60 * 60);
 }
 

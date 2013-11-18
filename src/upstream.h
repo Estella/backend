@@ -18,8 +18,6 @@
 #define __UPSTREAM_H
 
 #include "repsheet.h"
-#include <curl/curl.h>
-#include <json/json.h>
 
 #define EMAIL getenv("CLOUDFLARE_EMAIL")
 #define TOKEN getenv("CLOUDFLARE_TOKEN")

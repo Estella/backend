@@ -17,10 +17,6 @@
 #ifndef __OFDP_H
 #define __OFDP_H
 
-#include <curl/curl.h>
-#include <json/json.h>
-#include <errno.h>
-#include "util.h"
 #include "repsheet.h"
 
 #define OFDP_URL "http://wafsec.com/api?lean=true&ip="
