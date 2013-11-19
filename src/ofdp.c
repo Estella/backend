@@ -43,7 +43,7 @@ static size_t ofdp_callback(void *ptr, size_t size, size_t nmemb, void *data)
   return realsize;
 }
 
-callback_buffer ofdp_lookup(char *address)
+static callback_buffer ofdp_lookup(char *address)
 {
   CURL *curl;
   CURLcode res;
@@ -72,33 +72,26 @@ callback_buffer ofdp_lookup(char *address)
   return response;
 }
 
-void ofdp_lookup_offenders(redisContext *context, config_t config)
+int lookup_and_store_ofdp_score(redisContext *context, char *actor, int expiry)
 {
-  int i, wafsec_score;
-  redisReply *offenders, *score, *noop, *ttl;
+  int score;
 
-  offenders = redisCommand(context, "ZRANGEBYSCORE offenders 0 +inf");
-  if (offenders && (offenders->type == REDIS_REPLY_ARRAY)) {
-    for (i = 0; i < offenders->elements; i++) {
-      noop = redisCommand(context, "KEYS %s:repsheet:*", offenders->element[i]->str);
-      if (noop && (noop->elements > 0)) {
-        freeReplyObject(noop);
-        continue;
-      }
+  score = ofdp_score(ofdp_lookup(actor));
+  redisCommand(context, "SET %s:score %d", actor, score);
+  expire(context, actor, "score", expiry);
 
-      score = redisCommand(context, "GET %s:score", offenders->element[i]->str);
-      if (score && (score->type != REDIS_REPLY_NIL)) {
-        freeReplyObject(score);
-        continue;
-      }
+  return score;
+}
 
-      wafsec_score = ofdp_score(ofdp_lookup(offenders->element[i]->str));
-      redisCommand(context, "SET %s:score %d", offenders->element[i]->str, wafsec_score);
+int previously_scored(redisContext *context, char *actor)
+{
+  redisReply *score;
 
-      if (wafsec_score > config.ofdp_threshold) {
-        blacklist_and_expire(context, config.expiry, offenders->element[i]->str, OFDP_MESSAGE);
-      }
-    }
-    freeReplyObject(offenders);
+  score = redisCommand(context, "GET %s:score", actor);
+  if (score && (score->type != REDIS_REPLY_NIL)) {
+    freeReplyObject(score);
+    return 1;
   }
+
+  return 0;
 }

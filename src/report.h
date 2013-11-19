@@ -19,6 +19,6 @@
 
 #include "repsheet.h"
 
-void report(redisContext *context, config_t config);
+void report(redisContext *context);
 
 #endif
