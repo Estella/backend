@@ -44,7 +44,7 @@ redisContext *get_redis_context()
 static void print_usage()
 {
   printf("Repsheet Backend Version %s\n", VERSION);
-  printf("usage: repsheet [-srabuv] [-h] [-p] [-e] [-t] [-o]\n \
+  printf("usage: repsheet [-srauv] [-h] [-p] [-e] [-t] [-o]\n \
  --score                  -s score actors\n \
  --report                 -r report top 10 offenders\n \
  --analyze                -a analyze and act on offenders\n \
