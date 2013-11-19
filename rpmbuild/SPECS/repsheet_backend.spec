@@ -1,6 +1,6 @@
 Summary: The backend for Repsheet
 Name: repsheet_backend
-Version: 1.4.0
+Version: 2.0.0
 Release: 1
 License: ASL 2.0
 Group: System Environment/Daemons
@@ -35,6 +35,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/repsheet
 
 %changelog
+* Tue Nov 19 2013 Aaron Bedra <aaron@aaronbedra.com> - 2.0.0-1
+- Major refactoring. Introduces now top level options.
+* Thu Nov 14 2013 Aaron Bedra <aaron@aaronbedra.com> - 1.5.0-1
+- Fixes a segfault issue with OFDP scoring.
 * Fri Nov 08 2013 Aaron Bedra <aaron@aaronbedra.com> - 1.4.0-1
 - Adds historical blacklisting.
 * Mon Oct 28 2013 Aaron Bedra <aaron.bedra@braintreepayments.com> - 1.3.0-1
