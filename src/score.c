@@ -16,8 +16,7 @@
 
 #include "score.h"
 
-//TODO: write some tests for this
-static int total_offenses(redisContext *context, char *actor)
+int total_offenses(redisContext *context, char *actor)
 {
   int i;
   int total = 0;
