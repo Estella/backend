@@ -124,7 +124,7 @@ int main(int argc, char *argv[])
         if (redis_expiry != INVALID_ARGUMENT_ERROR) {
           config.expiry = redis_expiry;
         } else {
-          printf("Redis port must be between 1 and %d, defaulting to %d\n", USHRT_MAX, config.port);
+          printf("Redis expiry must be between 1 and %d, defaulting to %d\n", USHRT_MAX, config.expiry);
         }
         break;
 
