@@ -14,7 +14,12 @@
   limitations under the License.
 */
 
+#ifndef __ANALYZE_H
+#define __ANALYZE_H
+
 #include "repsheet.h"
 #include "ofdp.h"
 
 void analyze(redisContext *context, config_t config);
+
+#endif
