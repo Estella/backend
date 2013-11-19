@@ -17,26 +17,43 @@
 #ifndef __REPSHEET_H
 #define __REPSHEET_H
 
-#define VERSION "1.3.0"
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <getopt.h>
+#include <limits.h>
+#include <errno.h>
+#include <curl/curl.h>
+#include <json/json.h>
 
 #include "hiredis/hiredis.h"
 
+#include "util.h"
+#include "score.h"
+
+#define VERSION "2.0.0"
+
+#define TWENTYFOUR_HOURS 86400;
+
 typedef struct config_t {
-  char *host;
-  int port;
-  int threshold;
-  int report;
-  int blacklist;
+  // top level options
   int score;
+  int report;
+  int analyze;
+  int publish;
+
+  // redis configuration options
+  int port;
+  char *host;
   int expiry;
-  int upstream;
+
+  // analyze options
+  int blacklist;
   int ofdp;
+
+  // thresholds
   int ofdp_threshold;
+  int modsecurity_threshold;
 } config_t;
 
 #endif

@@ -17,9 +17,7 @@
 #ifndef __CLI_H
 #define __CLI_H
 
-#include <stdlib.h>
-#include <limits.h>
-#include <errno.h>
+#include "repsheet.h"
 
 #define INVALID_ARGUMENT_ERROR -1
 

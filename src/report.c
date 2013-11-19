@@ -16,31 +16,34 @@
 
 #include "report.h"
 
-void report(redisContext *context, config_t config)
+static void print_offenders(redisContext *context, redisReply *top_ten)
 {
   int i;
-  redisReply *top_ten, *score;
+  redisReply *offenses;
+
+  for(i = 0; i < 10; i++) {
+    offenses = redisCommand(context, "ZSCORE offenders %s", top_ten->element[i]->str);
+    if (offenses && offenses->type == REDIS_REPLY_STRING) {
+      printf("  %s\t%s offenses\n", top_ten->element[i]->str, offenses->str);
+      freeReplyObject(offenses);
+    }
+  }
+}
+
+void report(redisContext *context)
+{
+  score(context);
+
+  redisReply *top_ten;
 
   top_ten = redisCommand(context, "ZREVRANGEBYSCORE offenders +inf 0");
   if (top_ten && (top_ten->type == REDIS_REPLY_ARRAY) && (top_ten->elements > 0)) {
     if (top_ten->elements > 10) {
       printf("Top 10 Suspsects (not yet blacklisted)\n");
-      for(i = 0; i < 10; i++) {
-        score = redisCommand(context, "ZSCORE offenders %s", top_ten->element[i]->str);
-        if (score && score->type == REDIS_REPLY_STRING) {
-          printf("  %s\t%s offenses\n", top_ten->element[i]->str, score->str);
-          freeReplyObject(score);
-        }
-      }
+      print_offenders(context, top_ten);
     } else {
       printf("Top %zu Suspsects (not yet blacklisted)\n", top_ten->elements);
-      for(i = 0; i < top_ten->elements; i++) {
-        score = redisCommand(context, "ZSCORE offenders %s", top_ten->element[i]->str);
-        if (score && score->type == REDIS_REPLY_STRING) {
-          printf("  %s\t%s offenses\n", top_ten->element[i]->str, score->str);
-          freeReplyObject(score);
-        }
-      }
+      print_offenders(context, top_ten);
     }
     freeReplyObject(top_ten);
   }

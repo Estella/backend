@@ -20,5 +20,6 @@
 #include "repsheet.h"
 
 void score(redisContext *context);
+int total_offenses(redisContext *context, char *actor);
 
 #endif

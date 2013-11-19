@@ -14,35 +14,41 @@
   limitations under the License.
 */
 
-#include "util.h"
 #include "score.h"
+
+int total_offenses(redisContext *context, char *actor)
+{
+  int i;
+  int total = 0;
+  redisReply *offenses;
+
+  offenses = redisCommand(context, "ZRANGE %s:detected 0 -1 WITHSCORES", actor);
+  if (offenses && offenses->type == REDIS_REPLY_ARRAY) {
+    for(i = 1; i < offenses->elements; i += 2) {
+      total += strtol(offenses->element[i]->str, 0, 10);
+    }
+    freeReplyObject(offenses);
+  }
+
+  return total;
+}
 
 void score(redisContext *context)
 {
-  int i, j;
-  int total = 0;
-  redisReply *ignore, *scores, *suspects;
+  int i, score;
+  redisReply *suspects;
 
   redisCommand(context, "DEL offenders");
 
   suspects = redisCommand(context, "KEYS *:detected");
   if (suspects && suspects->type == REDIS_REPLY_ARRAY) {
     for (i = 0; i < suspects->elements; i++) {
-      ignore = redisCommand(context, "KEYS %s:repsheet:*", strip_address(suspects->element[i]->str));
-      if (ignore && (ignore->type == REDIS_REPLY_ARRAY) && (ignore->elements > 0)) {
-        freeReplyObject(ignore);
+      if (no_action_required(context, strip_address(suspects->element[i]->str))) {
         continue;
       }
 
-      scores = redisCommand(context, "ZRANGE %s 0 -1 WITHSCORES", suspects->element[i]->str);
-      if (scores && scores->type == REDIS_REPLY_ARRAY) {
-        for(j = 1; j < scores->elements; j+=2) {
-          total += atoi(scores->element[j]->str);
-        }
-        freeReplyObject(scores);
-        redisCommand(context, "ZINCRBY offenders %d %s", total, strip_address(suspects->element[i]->str));
-        total = 0;
-      }
+      score = total_offenses(context, strip_address(suspects->element[i]->str));
+      redisCommand(context, "ZINCRBY offenders %d %s", score, strip_address(suspects->element[i]->str));
     }
     freeReplyObject(suspects);
   }

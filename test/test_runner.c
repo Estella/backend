@@ -3,7 +3,7 @@
 
 int main(void) {
   SRunner *runner = srunner_create(make_score_suite());
-  srunner_add_suite(runner, make_blacklist_suite());
+  srunner_add_suite(runner, make_analyze_suite());
   srunner_add_suite(runner, make_ofdp_suite());
   srunner_add_suite(runner, make_cli_suite());
   srunner_run_all(runner, CK_NORMAL);
