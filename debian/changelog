@@ -1,3 +1,9 @@
+repsheet-backend (2.0.0-1) unstable-security; urgency=low
+
+  * Major refactoring and top level command changes
+
+ -- Aaron Bedra <aaron@aaronbedra.com>  Tue, 19 Nov 2013 15:37:58 -0600
+
 repsheet-backend (1.5.0-1) unstable-security; urgency=low
 
   * Fixes a segfault issue with OFDP scoring
