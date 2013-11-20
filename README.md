@@ -77,6 +77,6 @@ the OFDP threshold `-o / --ofdp_threshold` (default 50), or have been previously
 blacklisted and have returned after their blacklist has expired.
 
 ```sh
-$ repsheet -analyze --modsecurity_threshold 75 --ofdp_threshold 20
+$ repsheet --analyze --modsecurity_threshold 75 --ofdp_threshold 20
 Actor 1.1.1.1 has been blacklisted: The actor has exceeded the ModSecurity blacklist threshold. [Score: 181]
 ```
