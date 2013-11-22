@@ -1,6 +1,6 @@
 Summary: The backend for Repsheet
 Name: repsheet_backend
-Version: 2.0.0
+Version: 2.0.1
 Release: 1
 License: ASL 2.0
 Group: System Environment/Daemons
@@ -35,6 +35,8 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/repsheet
 
 %changelog
+* Thu Nov 21 2013 Aaron Bedra <aaron@aaronbedra.com> - 2.0.1-1
+- Fixes noop issue for previously scored actors.
 * Tue Nov 19 2013 Aaron Bedra <aaron@aaronbedra.com> - 2.0.0-1
 - Major refactoring. Introduces now top level options.
 * Thu Nov 14 2013 Aaron Bedra <aaron@aaronbedra.com> - 1.5.0-1
