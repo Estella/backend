@@ -1,3 +1,9 @@
+repsheet-backend (2.0.1-1) unstable-security; urgency=low
+
+  * Fixes noop issue with previously scored actors
+
+ -- Aaron Bedra <aaron@aaronbedra.com>  Thu, 21 Nov 2013 21:04:39 -0600
+
 repsheet-backend (2.0.0-1) unstable-security; urgency=low
 
   * Major refactoring and top level command changes
