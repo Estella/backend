@@ -8,10 +8,11 @@ under cron.
 
 ## Compiling
 
-You need the [hiredis](https://github.com/redis/hiredis) library
-installed for compilation and linking. You also need the standard
-autotools packages. This includes `autoconf`, `automake`, and
-`libtool`.
+You need the [hiredis](https://github.com/redis/hiredis),
+[libcurl](http://curl.haxx.se/libcurl/), and
+[libjson/json-c](https://github.com/json-c/json-c) libraries installed
+for compilation and linking. You also need the standard autotools
+packages. This includes `autoconf`, `automake`, and `libtool`.
 
 ```sh
 $ ./autogen.sh
@@ -22,24 +23,36 @@ $ sudo make install
 
 ## Usage
 
+```
+$ repsheet --version
+Repsheet Backend Version 2.0.0
+usage: repsheet [-srauv] [-h] [-p] [-e] [-t] [-o]
+  --score                  -s score actors
+  --report                 -r report top 10 offenders
+  --analyze                -a analyze and act on offenders
+  --publish                -u publish blacklist to upstream providers
+  --host                   -h <redis host>
+  --port                   -p <redis port>
+  --expiry                 -e <redis expiry> blacklist expire time
+  --modsecurity_threshold  -t <blacklist threshold>
+  --ofdp_threshold         -o <ofdp threshold> score and blacklist actors against wafsec.com
+  --version                -v print version and help
+```
+
 If you pass no arugments to the repsheet binary, it will default to
 simply scoring the actors in a sorted set inside of Redis under the
 offenders key.
 
 ```sh
 $ repsheet
-No options specified, performing score operation.
-To remove this message, specify -s (score) or [-r | -b] (report or blacklist)
+No options specified, performing score operation
 ```
 
-If you specify `-s` the message will go away
+The score `-s / --score` operation can be run on its own, but is also
+run during the report and analyze operations.
 
-```sh
-$ repsheet
-$
-```
-
-Using the `-r` option will print a report of the top ten unblacklisted actors
+Using the `-r / --report` option will print a report of the top ten
+unblacklisted actors.
 
 ```sh
 $ repsheet -r
@@ -57,27 +70,13 @@ Top 10 Suspsects (not yet blacklisted)
   1.1.1.45	934 offenses
 ```
 
-And the `-b` option will sweep the offenders list and blacklist any
-offenders that have an offense count higher than the threshold `-t`
-(default 200)
+And the `-a / --analyze` option will analyze the offenders list and
+blacklist any offenders that have an offense count higher than the
+ModSecurity threshold `-t / --modsecurity_threshold` (default 200),
+the OFDP threshold `-o / --ofdp_threshold` (default 50), or have been previously
+blacklisted and have returned after their blacklist has expired.
 
 ```sh
-$ repsheet -b
-repsheet -b -t 100
-Blacklisting the following repeat offenders (threshold == 100)
-  1.1.1.76
-  1.1.1.43
-  1.1.1.172
-  1.1.1.79
-  1.1.1.142
-  1.1.1.198
-  1.1.1.167
-  1.1.1.48
-  1.1.1.98
-  1.1.1.105
-  1.1.1.113
-  1.1.1.50
-  1.1.1.170
-  1.1.1.189
-  1.1.1.67
+$ repsheet --analyze --modsecurity_threshold 75 --ofdp_threshold 20
+Actor 1.1.1.1 has been blacklisted: The actor has exceeded the ModSecurity blacklist threshold. [Score: 181]
 ```

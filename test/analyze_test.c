@@ -131,6 +131,18 @@ START_TEST(blacklists_historical_repeat_offenders)
 }
 END_TEST
 
+START_TEST(doesnt_noop_when_previously_scored)
+{
+  redisCommand(context, "SET 1.1.1.7:score 4");
+  redisCommand(context, "ZINCRBY 1.1.1.7:detected 15 950001");
+
+  analyze(context, config);
+
+  reply = redisCommand(context, "EXISTS 1.1.1.7:repsheet:blacklist");
+  ck_assert_int_eq(reply->integer, 1);
+}
+END_TEST
+
 Suite *make_analyze_suite(void) {
   Suite *suite = suite_create("analyze");
 
@@ -142,6 +154,7 @@ Suite *make_analyze_suite(void) {
   tcase_add_test(tc_analyze, expires_blacklisted_keys);
   tcase_add_test(tc_analyze, keeps_a_record_of_blacklisted_actors);
   tcase_add_test(tc_analyze, blacklists_historical_repeat_offenders);
+  tcase_add_test(tc_analyze, doesnt_noop_when_previously_scored);
   suite_add_tcase(suite, tc_analyze);
 
   return suite;
