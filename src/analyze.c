@@ -27,7 +27,7 @@ void analyze(redisContext *context, config_t config)
   offenders = redisCommand(context, "ZRANGE offenders 0 -1 WITHSCORES");
   if (offenders && (offenders->type == REDIS_REPLY_ARRAY)) {
     for(i = 0; i < offenders->elements; i += 2) {
-      if (no_action_required(context, offenders->element[i]->str) || previously_scored(context, offenders->element[i]->str)) {
+      if (no_action_required(context, offenders->element[i]->str)) {
         continue;
       }
 
@@ -39,12 +39,14 @@ void analyze(redisContext *context, config_t config)
       modsecurity_score = strtol(offenders->element[i+1]->str, 0, 10);
       if (modsecurity_score >= config.modsecurity_threshold) {
         blacklist_and_expire(context, config.expiry, offenders->element[i]->str, THRESHOLD_MESSAGE, modsecurity_score);
-	continue;
+        continue;
       }
 
-      ofdp_score = lookup_and_store_ofdp_score(context, offenders->element[i]->str, config.expiry);
-      if (ofdp_score > config.ofdp_threshold) {
-        blacklist_and_expire(context, config.expiry, offenders->element[i]->str, OFDP_MESSAGE, ofdp_score);
+      if (!previously_scored(context, offenders->element[i]->str)) {
+        ofdp_score = lookup_and_store_ofdp_score(context, offenders->element[i]->str, config.expiry);
+        if (ofdp_score > config.ofdp_threshold) {
+          blacklist_and_expire(context, config.expiry, offenders->element[i]->str, OFDP_MESSAGE, ofdp_score);
+        }
       }
     }
     freeReplyObject(offenders);
