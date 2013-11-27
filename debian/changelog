@@ -1,3 +1,9 @@
+repsheet-backend (2.0.2-1) unstable-security; urgency=low
+
+  * Fixes segfault when wafsec.com is down
+
+ -- Aaron Bedra <aaron@aaronbedra.com>  Wed, 27 Nov 2013 10:15:12 -0600
+
 repsheet-backend (2.0.1-1) unstable-security; urgency=low
 
   * Fixes noop issue with previously scored actors
