@@ -1,6 +1,6 @@
 Summary: The backend for Repsheet
 Name: repsheet_backend
-Version: 2.0.1
+Version: 2.0.2
 Release: 1
 License: ASL 2.0
 Group: System Environment/Daemons
@@ -35,6 +35,8 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/repsheet
 
 %changelog
+* Wed Nov 27 2013 Aaron Bedra <aaron@aaronbedra.com> - 2.0.2-1
+- Fixes segfault when wafsec.com is down.
 * Thu Nov 21 2013 Aaron Bedra <aaron@aaronbedra.com> - 2.0.1-1
 - Fixes noop issue for previously scored actors.
 * Tue Nov 19 2013 Aaron Bedra <aaron@aaronbedra.com> - 2.0.0-1
