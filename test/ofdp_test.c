@@ -41,6 +41,14 @@ START_TEST(handles_no_score_in_json_response)
 }
 END_TEST
 
+START_TEST(doesnt_segfault_when_response_buffer_is_null)
+{
+  data.buffer = NULL;
+  data.size = 0;
+  int score = ofdp_score(data);
+}
+END_TEST
+
 Suite *make_ofdp_suite(void) {
   Suite *suite = suite_create("ofdp");
 
@@ -49,6 +57,7 @@ Suite *make_ofdp_suite(void) {
   tcase_add_test(tc_ofdp, properly_finds_the_score_in_the_response);
   tcase_add_test(tc_ofdp, handles_non_json_response);
   tcase_add_test(tc_ofdp, handles_no_score_in_json_response);
+  tcase_add_test(tc_ofdp, doesnt_segfault_when_response_buffer_is_null);
   suite_add_tcase(suite, tc_ofdp);
 
   return suite;

@@ -5,6 +5,11 @@ int ofdp_score(callback_buffer response)
   struct json_object *json, *score_obj;
   long score;
 
+  if (response.buffer == NULL) {
+    printf("The request to wafsec.com failed. Response was NULL.");
+    return 0;
+  }
+
   json = json_tokener_parse(response.buffer);
 
   if (is_error(json)) {

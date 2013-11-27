@@ -31,7 +31,7 @@
 #include "util.h"
 #include "score.h"
 
-#define VERSION "2.0.1"
+#define VERSION "2.0.2"
 
 #define TWENTYFOUR_HOURS 86400;
 
