@@ -80,10 +80,16 @@ void blacklist(redisContext *context, char *actor)
   redisCommand(context, "SADD repsheet:blacklist:history %s", actor);
 }
 
-void blacklist_and_expire(redisContext *context, int expiry, char *actor, char *message, int score)
+void set_reason(redisContext *context, char *actor, char *reason, int expiry)
+{
+  redisCommand(context, "SETEX %s:repsheet:blacklist:reason %d %s", actor, expiry, reason);
+}
+
+void blacklist_and_expire(redisContext *context, int expiry, char *actor, char *message, int score, char *reason)
 {
   blacklist(context, actor);
   expire(context, actor, "repsheet:blacklist", expiry);
+  set_reason(context, actor, reason, expiry);
 
   if (score) {
     printf("Actor %s has been blacklisted: %s. [Score: %d]\n", actor, message, score);

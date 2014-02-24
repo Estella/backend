@@ -34,6 +34,6 @@ int no_action_required(redisContext *context, char *actor);
 int historical_offender(redisContext *context, char *actor);
 void expire(redisContext *context, char *actor, char *suffix, int expiry);
 void blacklist(redisContext *context, char *actor);
-void blacklist_and_expire(redisContext *context, int expiry, char *actor, char *message, int score);
+void blacklist_and_expire(redisContext *context, int expiry, char *actor, char *message, int score, char *reason);
 
 #endif

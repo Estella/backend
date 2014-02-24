@@ -32,20 +32,20 @@ void analyze(redisContext *context, config_t config)
       }
 
       if(historical_offender(context, offenders->element[i]->str)) {
-        blacklist_and_expire(context, config.expiry, offenders->element[i]->str, HISTORY_MESSAGE, (int)NULL);
+        blacklist_and_expire(context, config.expiry, offenders->element[i]->str, HISTORY_MESSAGE, (int)NULL, "Return Offender");
         continue;
       }
 
       modsecurity_score = strtol(offenders->element[i+1]->str, 0, 10);
       if (modsecurity_score >= config.modsecurity_threshold) {
-        blacklist_and_expire(context, config.expiry, offenders->element[i]->str, THRESHOLD_MESSAGE, modsecurity_score);
+        blacklist_and_expire(context, config.expiry, offenders->element[i]->str, THRESHOLD_MESSAGE, modsecurity_score, "ModSecurity Threshold");
         continue;
       }
 
       if (!previously_scored(context, offenders->element[i]->str)) {
         ofdp_score = lookup_and_store_ofdp_score(context, offenders->element[i]->str, config.expiry);
         if (ofdp_score > config.ofdp_threshold) {
-          blacklist_and_expire(context, config.expiry, offenders->element[i]->str, OFDP_MESSAGE, ofdp_score);
+          blacklist_and_expire(context, config.expiry, offenders->element[i]->str, OFDP_MESSAGE, ofdp_score, "OFDP Threshold");
         }
       }
     }

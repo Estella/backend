@@ -128,6 +128,9 @@ START_TEST(blacklists_historical_repeat_offenders)
 
   reply = redisCommand(context, "EXISTS 1.1.1.7:repsheet:blacklist");
   ck_assert_int_eq(reply->integer, 1);
+
+  reply = redisCommand(context, "GET 1.1.1.7:repsheet:blacklist:reason");
+  ck_assert_str_eq(reply->str, "Return Offender");
 }
 END_TEST
 
