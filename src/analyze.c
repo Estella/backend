@@ -31,7 +31,7 @@ void analyze(redisContext *context, config_t config)
         continue;
       }
 
-      if(historical_offender(context, offenders->element[i]->str)) {
+      if(is_historical_offender(context, offenders->element[i]->str)) {
         blacklist_and_expire(context, offenders->element[i]->str, config.expiry, "Return Offender");
         continue;
       }

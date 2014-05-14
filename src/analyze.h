@@ -17,6 +17,8 @@
 #ifndef __ANALYZE_H
 #define __ANALYZE_H
 
+#include "repsheet.h"
+
 #include "backend.h"
 #include "ofdp.h"
 
