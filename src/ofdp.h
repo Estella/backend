@@ -18,6 +18,7 @@
 #define __OFDP_H
 
 #include "repsheet.h"
+#include "backend.h"
 
 #define OFDP_URL "http://wafsec.com/api?lean=true&ip="
 

@@ -14,8 +14,8 @@
   limitations under the License.
 */
 
-#ifndef __REPSHEET_H
-#define __REPSHEET_H
+#ifndef __BACKEND_H
+#define __BACKEND_H
 
 #include <stdio.h>
 #include <stdlib.h>

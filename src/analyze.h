@@ -17,7 +17,7 @@
 #ifndef __ANALYZE_H
 #define __ANALYZE_H
 
-#include "repsheet.h"
+#include "backend.h"
 #include "ofdp.h"
 
 void analyze(redisContext *context, config_t config);

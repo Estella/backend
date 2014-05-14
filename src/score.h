@@ -17,7 +17,7 @@
 #ifndef __SCORE_H
 #define __SCORE_H
 
-#include "repsheet.h"
+#include "backend.h"
 
 void score(redisContext *context);
 int total_offenses(redisContext *context, char *actor);

@@ -15,31 +15,14 @@
 */
 
 #include "repsheet.h"
-#include "score.h"
+
+#include "backend.h"
 #include "report.h"
 #include "analyze.h"
 #include "upstream.h"
 #include "cli.h"
 
 config_t config;
-
-redisContext *get_redis_context()
-{
-  redisContext *context;
-
-  context = redisConnect(config.host, config.port);
-  if (context == NULL || context->err) {
-    if (context) {
-      printf("Redis Connection Error: %s\n", context->errstr);
-      redisFree(context);
-    } else {
-      perror("Connection Error: can't allocate redis context\n");
-    }
-    return NULL;
-  } else {
-    return context;
-  }
-}
 
 static void print_usage()
 {
@@ -156,7 +139,7 @@ int main(int argc, char *argv[])
         abort();
       }
 
-  context = get_redis_context();
+  context = get_redis_context(config.host, config.port, 0);
   if (context == NULL) {
     return -1;
   }
