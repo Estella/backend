@@ -42,7 +42,7 @@ void analyze(redisContext *context, config_t config)
         continue;
       }
 
-      if (!previously_scored(context, offenders->element[i]->str)) {
+      if (!is_previously_scored(context, offenders->element[i]->str)) {
         ofdp_score = lookup_and_store_ofdp_score(context, offenders->element[i]->str, config.expiry);
         if (ofdp_score > config.ofdp_threshold) {
           blacklist_and_expire(context, offenders->element[i]->str, config.expiry, "OFDP Threshold");

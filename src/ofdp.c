@@ -87,16 +87,3 @@ int lookup_and_store_ofdp_score(redisContext *context, char *actor, int expiry)
 
   return score;
 }
-
-int previously_scored(redisContext *context, char *actor)
-{
-  redisReply *score;
-
-  score = redisCommand(context, "GET %s:score", actor);
-  if (score && (score->type != REDIS_REPLY_NIL)) {
-    freeReplyObject(score);
-    return 1;
-  }
-
-  return 0;
-}
