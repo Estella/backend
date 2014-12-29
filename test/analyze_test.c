@@ -42,30 +42,30 @@ START_TEST(does_not_blacklist_whitelisted_actors)
 {
   redisCommand(context, "ZINCRBY 1.1.1.1:detected 10 950001");
   redisCommand(context, "ZINCRBY 1.1.1.2:detected 10 950001");
-  redisCommand(context, "SET 1.1.1.1:repsheet:whitelist true");
+  redisCommand(context, "SET 1.1.1.1:repsheet:ip:whitelist true");
 
   analyze(context, config);
 
-  reply = redisCommand(context, "GET 1.1.1.2:repsheet:blacklist");
+  reply = redisCommand(context, "GET 1.1.1.2:repsheet:ip:blacklist");
   ck_assert_int_eq(reply->type, REDIS_REPLY_STRING);
 
-  reply = redisCommand(context, "EXISTS 1.1.1.1:repsheet:blacklist");
+  reply = redisCommand(context, "EXISTS 1.1.1.1:repsheet:ip:blacklist");
   ck_assert_int_eq(reply->integer, 0);
 }
 END_TEST
 
 START_TEST(can_blacklist_multiple_offenders_at_once)
 {
-  reply = redisCommand(context, "EXISTS 1.1.1.1:repsheet:blacklist");
+  reply = redisCommand(context, "EXISTS 1.1.1.1:repsheet:ip:blacklist");
   ck_assert_int_eq(reply->integer, 0);
 
-  reply = redisCommand(context, "EXISTS 1.1.1.2:repsheet:blacklist");
+  reply = redisCommand(context, "EXISTS 1.1.1.2:repsheet:ip:blacklist");
   ck_assert_int_eq(reply->integer, 0);
 
-  reply = redisCommand(context, "EXISTS 1.1.1.3:repsheet:blacklist");
+  reply = redisCommand(context, "EXISTS 1.1.1.3:repsheet:ip:blacklist");
   ck_assert_int_eq(reply->integer, 0);
 
-  reply = redisCommand(context, "EXISTS 1.1.1.4:repsheet:blacklist");
+  reply = redisCommand(context, "EXISTS 1.1.1.4:repsheet:ip:blacklist");
   ck_assert_int_eq(reply->integer, 0);
 
   redisCommand(context, "ZINCRBY 1.1.1.1:detected 10 950001");
@@ -77,22 +77,22 @@ START_TEST(can_blacklist_multiple_offenders_at_once)
 
   analyze(context, config);
 
-  reply = redisCommand(context, "EXISTS 1.1.1.1:repsheet:blacklist");
+  reply = redisCommand(context, "EXISTS 1.1.1.1:repsheet:ip:blacklist");
   ck_assert_int_eq(reply->integer, 1);
 
-  reply = redisCommand(context, "EXISTS 1.1.1.2:repsheet:blacklist");
+  reply = redisCommand(context, "EXISTS 1.1.1.2:repsheet:ip:blacklist");
   ck_assert_int_eq(reply->integer, 1);
 
-  reply = redisCommand(context, "EXISTS 1.1.1.3:repsheet:blacklist");
+  reply = redisCommand(context, "EXISTS 1.1.1.3:repsheet:ip:blacklist");
   ck_assert_int_eq(reply->integer, 1);
 
-  reply = redisCommand(context, "EXISTS 1.1.1.4:repsheet:blacklist");
+  reply = redisCommand(context, "EXISTS 1.1.1.4:repsheet:ip:blacklist");
   ck_assert_int_eq(reply->integer, 1);
 
-  reply = redisCommand(context, "EXISTS 1.1.1.5:repsheet:blacklist");
+  reply = redisCommand(context, "EXISTS 1.1.1.5:repsheet:ip:blacklist");
   ck_assert_int_eq(reply->integer, 0);
 
-  reply = redisCommand(context, "EXISTS 1.1.1.6:repsheet:blacklist");
+  reply = redisCommand(context, "EXISTS 1.1.1.6:repsheet:ip:blacklist");
   ck_assert_int_eq(reply->integer, 0);
 }
 END_TEST
@@ -103,7 +103,7 @@ START_TEST(expires_blacklisted_keys)
 
   analyze(context, config);
 
-  reply = redisCommand(context, "TTL 1.1.1.5:repsheet:blacklist");
+  reply = redisCommand(context, "TTL 1.1.1.5:repsheet:ip:blacklist");
   ck_assert(reply->integer > 86300);
 }
 END_TEST
@@ -114,22 +114,22 @@ START_TEST(keeps_a_record_of_blacklisted_actors)
 
   analyze(context, config);
 
-  reply = redisCommand(context, "SISMEMBER repsheet:blacklist:history 1.1.1.6");
+  reply = redisCommand(context, "SISMEMBER repsheet:ip:blacklist:history 1.1.1.6");
   ck_assert_int_eq(reply->integer, 1);
 }
 END_TEST
 
 START_TEST(blacklists_historical_repeat_offenders)
 {
-  redisCommand(context, "SADD repsheet:blacklist:history 1.1.1.7");
+  redisCommand(context, "SADD repsheet:ip:blacklist:history 1.1.1.7");
   redisCommand(context, "ZINCRBY 1.1.1.7:detected 1 950001");
 
   analyze(context, config);
 
-  reply = redisCommand(context, "EXISTS 1.1.1.7:repsheet:blacklist");
+  reply = redisCommand(context, "EXISTS 1.1.1.7:repsheet:ip:blacklist");
   ck_assert_int_eq(reply->integer, 1);
 
-  reply = redisCommand(context, "GET 1.1.1.7:repsheet:blacklist:reason");
+  reply = redisCommand(context, "GET 1.1.1.7:repsheet:ip:blacklist");
   ck_assert_str_eq(reply->str, "Return Offender");
 }
 END_TEST
@@ -141,7 +141,7 @@ START_TEST(doesnt_noop_when_previously_scored)
 
   analyze(context, config);
 
-  reply = redisCommand(context, "EXISTS 1.1.1.7:repsheet:blacklist");
+  reply = redisCommand(context, "EXISTS 1.1.1.7:repsheet:ip:blacklist");
   ck_assert_int_eq(reply->integer, 1);
 }
 END_TEST

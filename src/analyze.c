@@ -31,14 +31,14 @@ void analyze(redisContext *context, config_t config)
         continue;
       }
 
-      if(is_historical_offender(context, offenders->element[i]->str)) {
-        blacklist_and_expire(context, offenders->element[i]->str, config.expiry, "Return Offender");
+      if (is_historical_offender(context, IP, offenders->element[i]->str) == TRUE) {
+        blacklist_and_expire(context, IP, offenders->element[i]->str, config.expiry, "Return Offender");
         continue;
       }
 
       modsecurity_score = strtol(offenders->element[i+1]->str, 0, 10);
       if (modsecurity_score >= config.modsecurity_threshold) {
-        blacklist_and_expire(context, offenders->element[i]->str ,config.expiry, "ModSecurity Threshold");
+        blacklist_and_expire(context, IP, offenders->element[i]->str, config.expiry, "ModSecurity Threshold");
         continue;
       }
     }
