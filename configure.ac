@@ -11,7 +11,7 @@ AM_PROG_CC_C_O
 AC_PROG_LIBTOOL
 
 PKG_CHECK_MODULES([check], [check >= 0.9.4])
-PKG_CHECK_MODULES([libhiredis], [libhiredis >= 0.10.0], , [PKG_CHECK_MODULES([hiredis], [hiredis >= 0.10.0])])
+#PKG_CHECK_MODULES([libhiredis], [libhiredis >= 0.10.0], , [PKG_CHECK_MODULES([hiredis], [hiredis >= 0.10.0])])
 
 AC_CONFIG_FILES([
     Makefile
