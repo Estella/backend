@@ -20,7 +20,6 @@
 #include "repsheet.h"
 
 #include "backend.h"
-#include "ofdp.h"
 
 void analyze(redisContext *context, config_t config);
 

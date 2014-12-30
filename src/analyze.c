@@ -20,7 +20,7 @@ void analyze(redisContext *context, config_t config)
 {
   score(context);
 
-  int i, modsecurity_score, ofdp_score;
+  int i, modsecurity_score;
   int printed = 0;
   redisReply *offenders;
 

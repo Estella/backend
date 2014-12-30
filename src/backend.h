@@ -24,7 +24,6 @@
 #include <limits.h>
 #include <errno.h>
 #include <curl/curl.h>
-#include <json/json.h>
 
 #include "hiredis/hiredis.h"
 
@@ -49,10 +48,8 @@ typedef struct config_t {
 
   // analyze options
   int blacklist;
-  int ofdp;
 
   // thresholds
-  int ofdp_threshold;
   int modsecurity_threshold;
 } config_t;
 

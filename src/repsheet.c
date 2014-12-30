@@ -19,7 +19,6 @@
 #include "backend.h"
 #include "report.h"
 #include "analyze.h"
-#include "upstream.h"
 #include "cli.h"
 
 config_t config;
@@ -31,45 +30,39 @@ static void print_usage()
  --score                  -s score actors\n \
  --report                 -r report top 10 offenders\n \
  --analyze                -a analyze and act on offenders\n \
- --publish                -u publish blacklist to upstream providers\n \
  --host                   -h <redis host>\n \
  --port                   -p <redis port>\n \
  --expiry                 -e <redis expiry> blacklist expire time\n \
  --modsecurity_threshold  -t <blacklist threshold>\n \
- --ofdp_threshold         -o <ofdp threshold> score and blacklist actors against wafsec.com\n \
  --version                -v print version and help\n");
 }
 
 int main(int argc, char *argv[])
 {
   int c;
-  long ofdp_threshold, blacklist_threshold, redis_port, redis_expiry;
+  long blacklist_threshold, redis_port, redis_expiry;
   redisContext *context;
 
   config.score = 0;
   config.report = 0;
   config.analyze = 0;
-  config.publish = 0;
 
   config.host = "localhost";
   config.port = 6379;
   config.expiry = TWENTYFOUR_HOURS;
 
-  config.ofdp_threshold = 50;
   config.modsecurity_threshold = 200;
 
   static struct option long_options[] = {
     {"score",                 no_argument,       NULL, 's'},
     {"report",                no_argument,       NULL, 'r'},
     {"analyze",               no_argument,       NULL, 'a'},
-    {"publish",               no_argument,       NULL, 'u'},
 
     {"host",                  required_argument, NULL, 'h'},
     {"port",                  required_argument, NULL, 'p'},
     {"expiry",                required_argument, NULL, 'e'},
 
     {"modsecurity_threshold", required_argument, NULL, 't'},
-    {"ofdp_threshold",        required_argument, NULL, 'o'},
 
     {"version",               no_argument,       NULL, 'v'},
     {0,                       0,                 0,     0}
@@ -86,9 +79,6 @@ int main(int argc, char *argv[])
         break;
       case 'a':
         config.analyze = 1;
-        break;
-      case 'u':
-        config.publish = 1;
         break;
 
       case 'h':
@@ -119,14 +109,6 @@ int main(int argc, char *argv[])
           printf("ModSecurity threshold must be between 1 and %d, defaulting to %d\n", USHRT_MAX, config.modsecurity_threshold);
         }
         break;
-      case 'o':
-        ofdp_threshold = process_command_line_argument(optarg);
-        if (ofdp_threshold != INVALID_ARGUMENT_ERROR) {
-          config.ofdp_threshold = ofdp_threshold;
-        } else {
-          printf("OFDP threshold must be between 1 and %d, defaulting to %d\n", USHRT_MAX, config.ofdp_threshold);
-        }
-        break;
 
       case 'v':
         print_usage();
@@ -144,7 +126,7 @@ int main(int argc, char *argv[])
     return -1;
   }
 
-  if (!config.score && !config.report && !config.analyze && !config.publish) {
+  if (!config.score && !config.report && !config.analyze) {
     printf("No options specified, performing score operation\n");
     score(context);
   }
@@ -159,10 +141,6 @@ int main(int argc, char *argv[])
 
   if (config.analyze) {
     analyze(context, config);
-  }
-
-  if (config.publish) {
-    publish_blacklist(context);
   }
 
   redisFree(context);

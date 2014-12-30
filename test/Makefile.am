@@ -3,7 +3,6 @@ check_PROGRAMS = $(TESTS)
 test_runner_SOURCES = test_runner.c      \
                       score_test.c       \
                       analyze_test.c     \
-                      ofdp_test.c        \
                       cli_test.c         \
                       ../src/util. h     \
                       ../src/util.c      \
@@ -13,9 +12,7 @@ test_runner_SOURCES = test_runner.c      \
                       ../src/report.h    \
                       ../src/analyze.c   \
                       ../src/analyze.h   \
-                      ../src/ofdp.h      \
-                      ../src/ofdp.c      \
                       ../src/cli.h       \
                       ../src/cli.c
-test_runner_CFLAGS = $(CHECK_CFLAGS) $(JSON_C_CFLAGS) $(LIBCURL_CFLAGS)
-test_runner_LDADD = $(CHECK_LIBS) $(JSON_C_LIBS) $(LIBCURL_LIBS) -lhiredis -lrepsheet
+test_runner_CFLAGS = $(CHECK_CFLAGS)
+test_runner_LDADD = $(CHECK_LIBS) -lhiredis -lrepsheet
