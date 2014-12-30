@@ -14,5 +14,5 @@ test_runner_SOURCES = test_runner.c      \
                       ../src/analyze.h   \
                       ../src/cli.h       \
                       ../src/cli.c
-test_runner_CFLAGS = $(CHECK_CFLAGS)
-test_runner_LDADD = $(CHECK_LIBS) -lhiredis -lrepsheet
+test_runner_CFLAGS = $(check_CFLAGS)
+test_runner_LDADD = $(check_LIBS) -lhiredis -lrepsheet
