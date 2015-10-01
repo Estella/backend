@@ -1,3 +1,7 @@
+# Project Status: Unmaintained
+
+This was an experiment made in the earlier days of Repsheet. There are much better ways to deal with this and this experiment has outlived its usefulness. The repo will live on for historical purposes.
+
 # Repsheet Backend  [![Build Status](https://secure.travis-ci.org/repsheet/backend.png)](http://travis-ci.org/repsheet/backend?branch=master) ![Coverity Status](https://scan.coverity.com/projects/559/badge.svg?flat=1)
 
 This is the backend infrastructure for
